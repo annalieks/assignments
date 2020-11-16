@@ -1,0 +1,87 @@
+﻿using System;
+
+/*Даний інтерфейс поганий тим, що він включає занадто багато методів.
+ А що, якщо наш клас товарів не може мати знижок або промокодом, або для нього немає сенсу встановлювати матеріал з 
+ якого зроблений (наприклад, для книг). Таким чином, щоб не реалізовувати в кожному класі невикористовувані в ньому методи, краще 
+розбити інтерфейс на кілька дрібних і кожним конкретним класом реалізовувати потрібні інтерфейси.
+Перепишіть, розбивши інтерфейс на декілька інтерфейсів, керуючись принципом розділення інтерфейсу. 
+Опишіть класи книжки (розмір та колір не потрібні, але потрібна ціна та знижки) та верхній одяг (колір, розмір, ціна знижка),
+які реалізують притаманні їм інтерфейси.*/
+
+interface IItem
+{
+    void SetPrice(double price);
+}
+
+interface IItemWithDiscount : IItem
+{
+    void ApplyDiscount(String discount);
+}
+
+interface IItemWithPromocode
+{
+    void ApplyPromocode(String promocode);
+}
+
+interface IItemWithColor : IItem
+{
+    void SetColor(byte color);  
+}
+
+interface IItemWithSize : IItem
+{
+    void SetSize(byte size);
+}
+
+class Book : IItemWithDiscount
+{
+    private double _price;
+    private string _discount;
+
+    public void SetPrice(double price)
+    {
+        _price = price;
+    }
+
+    public void ApplyDiscount(string discount)
+    {
+        _discount += discount;
+    }
+}
+
+class Outerwear : IItemWithColor, IItemWithSize, IItemWithDiscount
+{
+    private double _price;
+    private byte _color;
+    private byte _size;
+    private string _discount;
+    
+    public void SetPrice(double price)
+    {
+        _price = price;
+    }
+
+    public void SetColor(byte color)
+    {
+        _color = color;
+    }
+
+    public void SetSize(byte size)
+    {
+        _size = size;
+    }
+
+    public void ApplyDiscount(string discount)
+    {
+        _discount += discount;
+    }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+       
+        Console.ReadKey();
+    }
+}
