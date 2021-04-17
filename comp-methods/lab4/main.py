@@ -1,13 +1,25 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from numpy.linalg import solve
 
 
 class Interpolation:
     def target_func(self, x):
         return np.sin(x)
 
-    def linear_method(self, x, y):
-        pass
+    @staticmethod
+    def linear_method(x, x_init, c):
+        n = len(x_init)
+        y = c[n - 1]
+        for j in range(n - 1, 0, -1):
+            y = y * x + c[j - 1]
+        return y
+
+    @staticmethod
+    def linear_coeffs(x, y):
+        n = len(x)
+        A = np.vstack([x ** j for j in range(n)]).T
+        return solve(A, y)
 
     @staticmethod
     def lagrange(x0, x, y):
@@ -37,13 +49,6 @@ class Interpolation:
             a[k: m] = (a[k:m] - a[k - 1]) / (x[k:m] - x[k - 1])
         return a
 
-    @staticmethod
-    def newton_basis(x0, x, j):
-        result = 1
-        for i in range(j):
-            result *= (x0 - x[j])
-        return result
-
 
 class Plot:
     title: str = 'Interpolation'
@@ -67,7 +72,7 @@ class Plot:
 
 if __name__ == '__main__':
     a, b = 1, 15
-    n = 10
+    n = 50
     plot = Plot()
     interpolation = Interpolation()
 
@@ -84,12 +89,16 @@ if __name__ == '__main__':
     # Newton divided diffs
     diffs = Interpolation.diff(x_init, y_init)
 
-    # y1 = interpolation.linear_method(x, y)
+    # Linear coeffs
+    c = Interpolation.linear_coeffs(x_init, y_init)
+
+    y1 = interpolation.linear_method(x, x_init, c)
     y2 = [interpolation.lagrange(x0, x_init, y_init) for x0 in x]
     y3 = [interpolation.newton(x0, x_init, diffs) for x0 in x]
 
     plot.add(x, y, 'r')
-    plot.add(x, y2, 'g')
-    plot.add(x, y3, 'b')
+    plot.add(x, y1, 'y')
+    # plot.add(x, y2, 'g')
+    # plot.add(x, y3, 'b')
 
     plot.show()
