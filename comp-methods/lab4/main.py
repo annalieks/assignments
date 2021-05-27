@@ -28,7 +28,7 @@ class EquationSolver:
 
 class Interpolation:
     def target_func(self, x):
-        return np.sin(x)
+        return np.sin(5 * x)
 
     @staticmethod
     def linear_method(x, x_init, c):
@@ -143,7 +143,7 @@ class Plot:
 
 if __name__ == '__main__':
     a, b = 1, 15
-    n = 20
+    n = 100
     plot = Plot()
     interpolation = Interpolation()
 
@@ -169,9 +169,9 @@ if __name__ == '__main__':
     y4 = interpolation.cubic_spline(x, x_init, y_init)
 
     plot.add(x, y, 'r')
-    # plot.add(x, y1, 'y')
-    # plot.add(x, y2, 'g')
-    # plot.add(x, y3, 'b')
+    plot.add(x, y1, 'y')
+    plot.add(x, y2, 'g')
+    plot.add(x, y3, 'b')
     plot.add(x, y4, 'g')
 
     plot.show()
