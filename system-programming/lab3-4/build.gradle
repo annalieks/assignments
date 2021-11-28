@@ -1,0 +1,14 @@
+apply plugin: 'java'
+
+sourceCompatibility = '11'
+targetCompatibility = '11'
+
+jar.manifest.attributes('Main-Class': 'lexer.Main')
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+}
