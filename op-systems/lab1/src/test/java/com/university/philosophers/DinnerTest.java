@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
  */
 public class DinnerTest {
 
-    private static final String TEST_FILE = "log.log";
+    private static final String TEST_FILE = "dinner.log";
     private static final int N = 5;
     private static final Pattern p = Pattern.compile("Philosopher ([0-9]+): ([A-Z]+)");
     private final PhilosopherState[] states = new PhilosopherState[N];
