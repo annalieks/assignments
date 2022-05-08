@@ -1,11 +1,11 @@
 :- style_check(-singleton).
 
 freqs([], []).
-freqs([X|Xs], [F|Fs]) :- count( Xs , X:1 , F , X1 ), freqs( X1 , Fs ).
+freqs([X|Xs], [F|Fs]) :- count(Xs, X:1, F, X1), freqs(X1, Fs).
 
-count([],F,F,[]).
-count( [H|T] , X:N , F , Fs ) :- H = X , N1 is N+1, count( T , X:N1 , F , Fs ).
-count( [H|T] , X:N , F , [H|Fs] ) :- H \= X , count( T , X:N , F , Fs ).
+count([], F, F, []).
+count([H|T], X:N, F, Fs) :- H=X, N1 is N+1, count(T, X:N1, F, Fs).
+count([H|T], X:N, F, [H|Fs]) :- H\=X, count(T, X:N, F, Fs).
 
 even(N):- mod(N,2) =:= 0.
 
