@@ -64,16 +64,6 @@ void printMatrix(const vector<vector<int>> &m) {
     }
 }
 
-static inline void cache_off() {
-//    __asm(
-//    "pushq %rax\n\t"
-//    "movq %cr0, %rax\n\t"
-//    "orq $0x40000000, %rax\n\t"
-//    "movq %rax, %cr0\n\t"
-//    "wbinvd\n\t"
-//    "popq %rax\n\t");
-}
-
 int main() {
     int n, m, k, g = 0;
     cout << "Input n m k for A[n x k], B[m x k]:" << endl;
@@ -82,7 +72,6 @@ int main() {
     while (g != 1 && g != 2) {
         cin >> g;
     }
-//    cache_off();
 
     matrixA = createMatrix(n, m);
     matrixB = createMatrix(m, k);

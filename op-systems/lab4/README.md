@@ -13,7 +13,7 @@ https://wiki.osdev.org/CPU_Registers_x86#CR0
 - Cache disabled:
     - 100 x 100 x 100
       ```
-      Time: 39280ms
-      Time: 4239ms
-      Time: 4012ms
+      Time: 1507ms
+      Time: 1493ms
+      Time: 1517ms
       ```
