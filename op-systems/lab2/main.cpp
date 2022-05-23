@@ -42,7 +42,7 @@ int f(int x) {
 }
 
 int g(int x) {
-    this_thread::sleep_for(seconds(8));
+    this_thread::sleep_for(seconds(12));
     return 4 * x;
 }
 
@@ -143,7 +143,7 @@ int main() {
                                 std::async(std::launch::async, g, x));
 
     while (!finished) {
-        auto status = result.wait_for(3000);
+        auto status = result.wait_for(10000);
         if (status != future_status::ready && !ignoreTimeout) {
             ignoreTimeout = handleTimeout();
         } else {
