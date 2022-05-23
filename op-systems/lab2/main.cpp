@@ -37,21 +37,51 @@ bool handleTimeout() {
 }
 
 int f(int x) {
-    this_thread::sleep_for(seconds(5));
+    this_thread::sleep_for(seconds(2));
     return 2 * x;
 }
 
 int g(int x) {
-    this_thread::sleep_for(seconds(35));
+    this_thread::sleep_for(seconds(8));
     return 4 * x;
 }
 
 template<typename T>
 class AggregateFuture {
     vector<future<T>> futures;
+    vector<int> results;
+    vector<thread> threads;
+
+    mutex m;
+    condition_variable cv;
+    atomic<int> finishedThreads;
 
     void wait_for_one(future<T> &f, long millis) {
         f.wait_for(milliseconds(millis));
+
+        if (isTaskFinished(f)) {
+            int result = f.get();
+            addResult(result);
+
+            if (result == 0) {
+                cv.notify_all();
+                return;
+            }
+        }
+
+        finishedThreads++;
+        notifyIfFinished();
+    }
+
+    void addResult(int result) {
+        unique_lock<mutex> lock(m);
+        results.push_back(result);
+    }
+
+    void notifyIfFinished() {
+        if (finishedThreads == threads.size()) {
+            cv.notify_all();
+        }
     }
 
 public:
@@ -61,25 +91,29 @@ public:
     }
 
     future_status wait_for(long millis) {
-        vector<thread> threads;
+        finishedThreads = 0;
+        threads.clear();
         for (auto &f : futures) {
-            if (!isTaskFinished(f)) {
+            if (f.valid()) {
                 threads.emplace_back(
                         thread(&AggregateFuture<T>::wait_for_one, this, std::ref(f), millis)
                 );
             }
         }
         for (auto &t : threads) {
-            t.join();
+            t.detach();
         }
+        unique_lock<mutex> lock(m);
+        if (!threads.empty())
+            cv.wait(lock);
         return getStatus();
     }
 
     future_status getStatus() {
-        for (auto &f : futures) {
-            if (!isTaskFinished(f)) return future_status::timeout;
+        for (auto &res : results) {
+            if (res == 0) return future_status::ready;
         }
-        return future_status::ready;
+        return results.size() == futures.size() ? future_status::ready : future_status::timeout;
     }
 
     static bool isTaskFinished(future<T> &f) {
@@ -87,14 +121,19 @@ public:
         return status == future_status::ready;
     }
 
-    vector<future<int>> &getFutures() {
-        return futures;
+    long getResult() {
+        unique_lock<mutex> lock(m);
+        long answer = 1;
+        for (auto &res : results) {
+            answer *= res;
+        }
+        return answer;
     }
 };
 
 int main() {
     int x;
-    long answer = 1;
+    long answer;
     bool finished = false, ignoreTimeout = false;
     cout << "Input x:" << endl;
     cin >> x;
@@ -104,18 +143,14 @@ int main() {
                                 std::async(std::launch::async, g, x));
 
     while (!finished) {
-        auto status = result.wait_for(10000);
+        auto status = result.wait_for(3000);
         if (status != future_status::ready && !ignoreTimeout) {
             ignoreTimeout = handleTimeout();
         } else {
-            auto &futures = result.getFutures();
-            for (auto &f : futures) {
-                int res = f.get();
-                answer *= res;
-            }
+            answer = result.getResult();
             finished = true;
         }
     }
     cout << "Computation result: " << answer << endl;
-    return 0;
+    exit(0);
 }
