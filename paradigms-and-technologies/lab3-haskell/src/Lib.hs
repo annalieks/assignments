@@ -68,8 +68,7 @@ forEachEdge (e:edges) (v1, v2, v3) aut vis st en w a2 a3 = dfs
   
 nextIteration :: (Int, Int, Int) -> [(Int, Int, Char)] -> [(Int, Int, Int)] -> t -> Int -> String -> Int -> Int -> String
 nextIteration (v1, v2, v3) aut = forEachEdge (intersection (listOfEdges (listOfVertices v1 v2 v3 aut))) (v1, v2, v3) aut
-  
- -- if visited is correct, 
+   
 getAnswer :: (Eq t1, Eq t2, Eq t3) => [(t1, t2, t3)] -> String -> t1 -> t2 -> t3 -> String
 getAnswer [] _ _ _ _ = ""
 getAnswer ((v1, v2, v3):vis) w a2 a3 en = if (v1 == a2) && (v2 == a3) && (v3 == en) 
@@ -98,7 +97,6 @@ findWord aut st = processTriples (combinations st aut) aut st
 main :: IO ()
 main = do
 	print("Negative cases:")
-	print(findWord [(1, 2, 'a'), (2, 3, 'c'), (3, 2, 'a')] 1 3)
 	print(findWord [(1, 2, 'a')] 1 2)
 	print(findWord [(1, 2, 'a'), (2, 3, 'a')] 1 3)
 	print(findWord [(1, 2, 'a'), (2, 3, 'b'), (3, 4, 'c'), (3, 1, 'a')] 1 4)
@@ -109,3 +107,9 @@ main = do
 	print(findWord [(1, 2, 'c'), (2, 3, 'b'), (3, 4, 'c'), (4, 5, 'b'), 
 					(5, 6, 'c'), (6, 7, 'b'), (7, 8, 'c'), (8, 1, 'b')] 1 5)
 	print(findWord [(1, 2, 'a'), (2, 3, 'b'), (3, 4, 'c'), (4, 2, 'a')] 1 4)
+
+	print("Predefined")
+	print(findWord [(0, 1, 'a'), (1, 1, 'b'), (1, 3, 'a'), (0, 2, 'b'), (2, 2, 'a'), (2, 3, 'b')] 1 3)
+	print(findWord [(0, 1, 'a'), (1, 1, 'b'), (1, 3, 'a'), (0, 2, 'b'), (2, 2, 'a'), (2, 3, 'b'), (3, 3, 'a'), (3, 3, 'b')] 1 3)
+	print(findWord [(0, 1, 'a'), (1, 1, 'b'), (1, 3, 'a'), (0, 2, 'b'), (2, 2, 'a'), (2, 3, 'b'), (3, 1, 'a'), (3, 3, 'b')] 1 3)
+	
