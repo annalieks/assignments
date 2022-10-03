@@ -10,8 +10,7 @@ public class RowMapper {
     public static RowDto rowToRowDto(Row r) {
         RowDto dto = new RowDto();
         dto.setId(r.getId());
-        dto.setFields(r.getFields().stream()
-                .map(FieldMapper::fieldToFieldDto).collect(Collectors.toList()));
+        dto.setFields(r.getFields());
         return dto;
     }
 

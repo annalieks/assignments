@@ -1,12 +1,11 @@
 package com.university.db.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.university.db.dto.DatabaseCreateDto;
 import com.university.db.dto.DatabaseDto;
+import com.university.db.dto.metadata.DatabaseMetadataDto;
 import com.university.db.dto.ErrorResponse;
-import com.university.db.entity.Database;
+import com.university.db.dto.export.ExportedDatabaseDto;
 import com.university.db.exception.ConflictException;
-import com.university.db.mapper.DatabaseMapper;
+import com.university.db.exception.NotFoundException;
 import com.university.db.service.DatabaseService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -16,7 +15,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
+
+import static com.university.db.utils.RequestUtils.conflict;
+import static com.university.db.utils.RequestUtils.notFound;
 
 @RestController
 @RequestMapping("${api.context}/databases")
@@ -32,11 +33,12 @@ public class DatabaseController {
     }
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody DatabaseCreateDto dto) {
+    public ResponseEntity<?> create(@RequestBody DatabaseMetadataDto dto) {
         try {
-            Database database = databaseService.create(dto.getName());
-            return ResponseEntity.created(URI.create(apiContext + "/databases/" + database.getId()))
-                    .body(DatabaseMapper.databaseToDatabaseDto(database));
+            DatabaseDto database = databaseService.create(dto.getName());
+            return ResponseEntity
+                    .created(URI.create(String.format("%s/databases/%s", apiContext, database.getId())))
+                    .body(database);
         } catch (ConflictException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new ErrorResponse(e.getMessage()));
@@ -44,45 +46,60 @@ public class DatabaseController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> findById(@PathVariable String id) {
-        Optional<Database> database = databaseService.findById(id);
-        if (database.isPresent()) {
-            return ResponseEntity.ok(DatabaseMapper.databaseToDatabaseDto(database.get()));
+    public ResponseEntity<?> find(@PathVariable String id) {
+        try {
+            DatabaseDto database = databaseService.findById(id);
+            return ResponseEntity.ok(database);
+        } catch (NotFoundException e) {
+            return notFound(e.getMessage());
         }
-        return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/export")
-    public ResponseEntity<?> exportDb(@RequestParam String id) throws JsonProcessingException {
-        Optional<Database> database = databaseService.findById(id);
-        if (database.isPresent()) {
-            return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(databaseService.convertToFile(database.get()));
-        }
-        return ResponseEntity.notFound().build();
-    }
-
-    @GetMapping
-    public ResponseEntity<?> findByName(@RequestParam String name) {
-        Optional<Database> database = databaseService.findByName(name);
-        if (database.isPresent()) {
-            return ResponseEntity.ok(DatabaseMapper.databaseToDatabaseDto(database.get()));
-        } else {
-            return ResponseEntity.notFound().build();
+    @GetMapping(path = "/{id}/export", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody
+    ResponseEntity<?> exportDb(@PathVariable String id) {
+        try {
+            ExportedDatabaseDto database = databaseService.export(id);
+            return ResponseEntity.ok().body(database);
+        } catch (NotFoundException e) {
+            return notFound(e.getMessage());
         }
     }
 
     @GetMapping
-    public ResponseEntity<?> findAll() {
-        List<Database> databases = databaseService.findAll();
-        List<DatabaseDto> dto = databases.stream().map(DatabaseMapper::databaseToDatabaseDto).toList();
-        return ResponseEntity.ok(dto);
+    public ResponseEntity<?> findByName(@RequestParam(required = false) String name) {
+        if (name == null) {
+            List<DatabaseDto> databases = databaseService.findAll();
+            return ResponseEntity.ok(databases);
+        }
+        try {
+            DatabaseDto database = databaseService.findByName(name);
+            return ResponseEntity.ok(database);
+        } catch (NotFoundException e) {
+            return notFound(e.getMessage());
+        }
     }
 
-    @PostMapping
-    public ResponseEntity<?> importDb(@RequestBody ImportDbDto dto) {
-        return null;
+    @PutMapping("/{id}")
+    public ResponseEntity<?> edit(@PathVariable String id, @RequestBody DatabaseMetadataDto dto) {
+        try {
+            DatabaseDto db = databaseService.edit(id, dto);
+            return ResponseEntity.ok(db);
+        } catch (NotFoundException e) {
+            return notFound(e.getMessage());
+        } catch (ConflictException e) {
+            return conflict(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable String id) {
+        try {
+            databaseService.delete(id);
+            return ResponseEntity.ok().build();
+        } catch (NotFoundException e) {
+            return notFound(e.getMessage());
+        }
     }
 
 }

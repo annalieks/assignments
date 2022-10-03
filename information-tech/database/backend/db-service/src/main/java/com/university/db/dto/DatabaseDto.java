@@ -9,6 +9,5 @@ public class DatabaseDto {
 
     private String id;
     private String name;
-    private List<TableDto> tables;
 
 }

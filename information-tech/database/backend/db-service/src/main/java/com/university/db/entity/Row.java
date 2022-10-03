@@ -11,6 +11,6 @@ public class Row {
 
     @Id
     private String id;
-    private List<Field> fields = new ArrayList<>();
+    private List<String> fields = new ArrayList<>();
 
 }

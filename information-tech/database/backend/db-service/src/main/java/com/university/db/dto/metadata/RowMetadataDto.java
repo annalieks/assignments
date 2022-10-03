@@ -1,13 +1,12 @@
-package com.university.db.dto;
+package com.university.db.dto.metadata;
 
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class RowDto {
+public class RowMetadataDto {
 
-    private String id;
     private List<String> fields;
 
 }
