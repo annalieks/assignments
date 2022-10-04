@@ -1,19 +1,23 @@
 package com.university.db.controller;
 
 import com.university.db.dto.TableDto;
+import com.university.db.dto.intersect.IntersectionTableDto;
 import com.university.db.dto.metadata.TableMetadataDto;
+import com.university.db.dto.serialization.ExportTableDto;
 import com.university.db.exception.ConflictException;
+import com.university.db.exception.InvalidDataException;
 import com.university.db.exception.NotFoundException;
 import com.university.db.service.TableService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import java.net.URI;
 import java.util.List;
 
-import static com.university.db.utils.RequestUtils.conflict;
-import static com.university.db.utils.RequestUtils.notFound;
+import static com.university.db.utils.RequestUtils.*;
 
 @RestController
 @RequestMapping("${api.context}")
@@ -28,7 +32,8 @@ public class TableController {
     }
 
     @PostMapping("/databases/{id}/tables")
-    public ResponseEntity<?> create(@PathVariable("id") String databaseId, @RequestBody TableMetadataDto dto) {
+    public ResponseEntity<?> create(@Valid @NotBlank @PathVariable("id") String databaseId,
+                                    @Valid @RequestBody TableMetadataDto dto) {
         try {
             TableDto table = tableService.create(databaseId, dto);
             return ResponseEntity
@@ -43,7 +48,7 @@ public class TableController {
     }
 
     @GetMapping("/tables/{id}")
-    public ResponseEntity<?> findById(@PathVariable String id) {
+    public ResponseEntity<?> findById(@Valid @NotBlank @PathVariable String id) {
         try {
             TableDto table = tableService.findById(id);
             return ResponseEntity.ok(table);
@@ -53,7 +58,7 @@ public class TableController {
     }
 
     @GetMapping("/databases/{id}/tables")
-    public ResponseEntity<?> findInDatabase(@PathVariable String id) {
+    public ResponseEntity<?> findInDatabase(@Valid @NotBlank @PathVariable String id) {
         try {
             List<TableDto> tables = tableService.findInDatabase(id);
             return ResponseEntity.ok(tables);
@@ -63,7 +68,8 @@ public class TableController {
     }
 
     @DeleteMapping("/databases/{databaseId}/tables/{id}")
-    public ResponseEntity<?> delete(@PathVariable String databaseId, @PathVariable String id) {
+    public ResponseEntity<?> delete(@Valid @NotBlank @PathVariable String databaseId,
+                                    @Valid @NotBlank @PathVariable String id) {
         try {
             tableService.delete(databaseId, id);
             return ResponseEntity.ok().build();
@@ -73,9 +79,9 @@ public class TableController {
     }
 
     @PutMapping("/databases/{databaseId}/tables/{id}")
-    public ResponseEntity<?> edit(@PathVariable String databaseId,
-                                  @PathVariable String id,
-                                  @RequestBody TableMetadataDto dto) {
+    public ResponseEntity<?> edit(@Valid @NotBlank @PathVariable String databaseId,
+                                  @Valid @NotBlank @PathVariable String id,
+                                  @Valid @RequestBody TableMetadataDto dto) {
         try {
             TableDto table = tableService.edit(databaseId, id, dto);
             return ResponseEntity.ok(table);
@@ -83,6 +89,19 @@ public class TableController {
             return notFound(e.getMessage());
         } catch (ConflictException e) {
             return conflict(e.getMessage());
+        }
+    }
+
+    @GetMapping("/tables/intersect")
+    public ResponseEntity<?> intersect(@Valid @NotBlank @RequestParam String leftId,
+                                       @Valid @NotBlank @RequestParam String rightId) {
+        try {
+            IntersectionTableDto table = tableService.intersect(leftId, rightId);
+            return ResponseEntity.ok(table);
+        } catch (InvalidDataException e) {
+            return badRequest(e.getMessage());
+        } catch (NotFoundException e) {
+            return notFound(e.getMessage());
         }
     }
 

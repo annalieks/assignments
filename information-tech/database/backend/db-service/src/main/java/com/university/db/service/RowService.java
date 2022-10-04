@@ -1,9 +1,12 @@
 package com.university.db.service;
 
 import com.university.db.dto.RowDto;
+import com.university.db.dto.metadata.RowMetadataDto;
+import com.university.db.entity.Column;
 import com.university.db.entity.Row;
 import com.university.db.entity.Table;
-import com.university.db.exception.ConflictException;
+import com.university.db.entity.ValueType;
+import com.university.db.exception.InvalidDataException;
 import com.university.db.exception.NotFoundException;
 import com.university.db.mapper.RowMapper;
 import com.university.db.repository.RowRepository;
@@ -45,6 +48,50 @@ public class RowService {
                 .collect(Collectors.toList());
     }
 
+    public RowDto create(String tableId, RowMetadataDto dto)
+            throws NotFoundException, InvalidDataException {
+        Table table = tableService.findTableById(tableId);
+        validateFields(dto.getFields(), table.getColumns());
+        Row row = new Row();
+        row.setFields(dto.getFields());
+        row = rowRepository.save(row);
+        table.getRows().add(row);
+        tableService.save(table);
+        return RowMapper.rowToRowDto(row);
+    }
+
+    @Transactional
+    public RowDto edit(String tableId, String rowId, RowMetadataDto dto) throws NotFoundException, InvalidDataException {
+        Table table = tableService.findTableById(tableId);
+        Row row = findRowById(rowId);
+        validateFields(dto.getFields(), table.getColumns());
+        row.setFields(dto.getFields());
+        for (Row r : table.getRows()) {
+            if (r.getId().equals(rowId)) {
+                r.setFields(dto.getFields());
+            }
+        }
+        tableService.save(table);
+        row = rowRepository.save(row);
+        return RowMapper.rowToRowDto(row);
+    }
+
+    public static void validateFields(List<String> fields, List<Column> columns) throws InvalidDataException {
+        if (fields.size() != columns.size()) {
+            handleInvalidData("number of fields is not equal to number of columns");
+        }
+        if (fields.size() == 0) {
+            handleInvalidData("fields cannot be empty");
+        }
+        for (int i = 0; i < columns.size(); i++) {
+            Column c = columns.get(i);
+            String value = fields.get(i);
+            if (!ValueType.validate(c.getType(), value)) {
+                handleInvalidData(String.format("value %s is not of type %s", value, c.getType()));
+            }
+        }
+    }
+
     @Transactional
     public void delete(String tableId, String id) throws NotFoundException {
         Table table = tableService.findTableById(tableId);
@@ -58,12 +105,24 @@ public class RowService {
         tableService.save(table);
     }
 
+    public Row save(Row row) {
+        return rowRepository.save(row);
+    }
+
+    public void delete(Row row) {
+        rowRepository.delete(row);
+    }
+
     private boolean isWithinTable(String id, Table table) {
         return table.getRows().stream().anyMatch(r -> r.getId().equals(id));
     }
 
-    private void handleNotFoundById(String id) throws NotFoundException {
+    private static void handleNotFoundById(String id) throws NotFoundException {
         throw new NotFoundException(String.format("Row with id %s not found within table", id));
+    }
+
+    private static void handleInvalidData(String reason) throws InvalidDataException {
+        throw new InvalidDataException(String.format("Invalid data provided: %s", reason));
     }
 
 }

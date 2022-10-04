@@ -1,6 +1,7 @@
 package com.university.db.service;
 
 import com.university.db.dto.ColumnDto;
+import com.university.db.dto.metadata.ColumnEditableMetadataDto;
 import com.university.db.dto.metadata.ColumnMetadataDto;
 import com.university.db.entity.Column;
 import com.university.db.entity.Row;
@@ -20,14 +21,14 @@ import java.util.stream.Collectors;
 public class ColumnService {
 
     private final ColumnRepository columnRepository;
-    private final DatabaseService databaseService;
+    private final RowService rowService;
     private final TableService tableService;
 
     public ColumnService(ColumnRepository columnRepository,
-                         DatabaseService databaseService,
+                         RowService rowService,
                          TableService tableService) {
         this.columnRepository = columnRepository;
-        this.databaseService = databaseService;
+        this.rowService = rowService;
         this.tableService = tableService;
     }
 
@@ -37,6 +38,10 @@ public class ColumnService {
         Table table = tableService.findTableById(tableId);
         if (findDuplicate(table, dto.getName()).isPresent()) {
             handleExistsByName(dto.getName());
+        }
+        for (Row r : table.getRows()) {
+            r.getFields().add(null);
+            rowService.save(r);
         }
         Column column = ColumnMapper.columnMetadataDtoToColumn(dto);
         column = save(column);
@@ -79,18 +84,26 @@ public class ColumnService {
         if (idx == -1) {
             handleNotFoundById(id);
         }
-        for (Row row : table.getRows()) {
-            row.getFields().remove(idx);
-        }
         table.setColumns(table.getColumns().stream()
                 .filter(c -> !c.getId().equals(id))
+                .collect(Collectors.toList()));
+        for (Row row : table.getRows()) {
+            row.getFields().remove(idx);
+            if (row.getFields().size() == 0) {
+                rowService.delete(row);
+            } else {
+                rowService.save(row);
+            }
+        }
+        table.setRows(table.getRows().stream()
+                .filter(r -> r.getFields().size() != 0)
                 .collect(Collectors.toList()));
         tableService.save(table);
         columnRepository.delete(column);
     }
 
     @Transactional
-    public ColumnDto edit(String tableId, String id, ColumnMetadataDto dto)
+    public ColumnDto edit(String tableId, String id, ColumnEditableMetadataDto dto)
             throws NotFoundException, ConflictException {
         Table table = tableService.findTableById(tableId);
         Column column = findColumnById(id);
@@ -102,11 +115,9 @@ public class ColumnService {
             handleExistsByName(dto.getName());
         }
         column.setName(dto.getName());
-        column.setType(dto.getType());
         for (Column c : table.getColumns()) {
             if (c.getId().equals(id)) {
                 c.setName(dto.getName());
-                c.setType(dto.getType());
             }
         }
         tableService.save(table);

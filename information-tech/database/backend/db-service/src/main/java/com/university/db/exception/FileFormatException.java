@@ -6,4 +6,8 @@ public class FileFormatException extends Exception {
         super(message);
     }
 
+    public FileFormatException(String message, Exception e) {
+        super(message, e);
+    }
+
 }

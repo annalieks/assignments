@@ -17,4 +17,8 @@ public class RequestUtils {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(message));
     }
 
+    public static ResponseEntity<?> badRequest(String message) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(message));
+    }
+
 }

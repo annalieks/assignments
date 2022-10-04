@@ -14,6 +14,10 @@ public class ColumnMapper {
         return dto;
     }
 
+    public static ColumnMetadataDto columnToColumnMetadataDto(Column c) {
+        return new ColumnMetadataDto(c.getName(), c.getType());
+    }
+
     public static Column columnMetadataDtoToColumn(ColumnMetadataDto dto) {
         Column column = new Column();
         column.setName(dto.getName());

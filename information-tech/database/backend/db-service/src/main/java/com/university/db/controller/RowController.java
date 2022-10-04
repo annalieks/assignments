@@ -2,14 +2,19 @@ package com.university.db.controller;
 
 import com.university.db.dto.RowDto;
 import com.university.db.dto.metadata.RowMetadataDto;
+import com.university.db.exception.InvalidDataException;
 import com.university.db.exception.NotFoundException;
 import com.university.db.service.RowService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import java.net.URI;
 import java.util.List;
 
+import static com.university.db.utils.RequestUtils.badRequest;
 import static com.university.db.utils.RequestUtils.notFound;
 
 @RestController
@@ -26,7 +31,7 @@ public class RowController {
     }
 
     @GetMapping("/rows/{id}")
-    public ResponseEntity<?> find(@PathVariable String id) {
+    public ResponseEntity<?> find(@Valid @NotBlank @PathVariable String id) {
         try {
             RowDto row = rowService.find(id);
             return ResponseEntity.ok(row);
@@ -36,7 +41,7 @@ public class RowController {
     }
 
     @GetMapping("/tables/{tableId}/rows")
-    public ResponseEntity<?> findAll(@PathVariable String tableId) {
+    public ResponseEntity<?> findAll(@Valid @NotBlank @PathVariable String tableId) {
         try {
             List<RowDto> rows = rowService.findAll(tableId);
             return ResponseEntity.ok(rows);
@@ -46,12 +51,37 @@ public class RowController {
     }
 
     @PostMapping("/tables/{tableId}/rows")
-    public ResponseEntity<?> create(@PathVariable String tableId, RowMetadataDto dto) {
-        return null;
+    public ResponseEntity<?> create(@Valid @NotBlank @PathVariable String tableId,
+                                    @Valid @RequestBody RowMetadataDto dto) {
+        try {
+            RowDto row = rowService.create(tableId, dto);
+            return ResponseEntity.created(URI.create(
+                    String.format("%s/tables/%s/rows/%s", apiContext, tableId, row.getId())))
+                    .body(row);
+        } catch (NotFoundException e) {
+            return notFound(e.getMessage());
+        } catch (InvalidDataException e) {
+            return badRequest(e.getMessage());
+        }
+    }
+
+    @PutMapping("/tables/{tableId}/rows/{id}")
+    public ResponseEntity<?> edit(@Valid @NotBlank @PathVariable String tableId,
+                                  @Valid @NotBlank @PathVariable String id,
+                                  @Valid @RequestBody RowMetadataDto dto) {
+        try {
+            RowDto row = rowService.edit(tableId, id, dto);
+            return ResponseEntity.ok(row);
+        } catch (NotFoundException e) {
+            return notFound(e.getMessage());
+        } catch (InvalidDataException e) {
+            return badRequest(e.getMessage());
+        }
     }
 
     @DeleteMapping("/tables/{tableId}/rows/{id}")
-    public ResponseEntity<?> delete(@PathVariable String tableId, @PathVariable String id) {
+    public ResponseEntity<?> delete(@Valid @NotBlank @PathVariable String tableId,
+                                    @Valid @NotBlank @PathVariable String id) {
         try {
             rowService.delete(tableId, id);
             return ResponseEntity.ok().build();

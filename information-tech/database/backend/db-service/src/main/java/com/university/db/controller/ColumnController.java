@@ -1,6 +1,7 @@
 package com.university.db.controller;
 
 import com.university.db.dto.ColumnDto;
+import com.university.db.dto.metadata.ColumnEditableMetadataDto;
 import com.university.db.dto.metadata.ColumnMetadataDto;
 import com.university.db.exception.ConflictException;
 import com.university.db.exception.NotFoundException;
@@ -9,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import java.net.URI;
 import java.util.List;
 
@@ -29,7 +32,8 @@ public class ColumnController {
     }
 
     @PostMapping("/tables/{tableId}/columns")
-    public ResponseEntity<?> create(@PathVariable String tableId, @RequestBody ColumnMetadataDto dto) {
+    public ResponseEntity<?> create(@Valid @NotBlank @PathVariable String tableId,
+                                    @Valid @RequestBody ColumnMetadataDto dto) {
         try {
             ColumnDto column = columnService.create(tableId, dto);
             return ResponseEntity
@@ -44,7 +48,7 @@ public class ColumnController {
     }
 
     @GetMapping("/columns/{id}")
-    public ResponseEntity<?> find(@PathVariable String id) {
+    public ResponseEntity<?> find(@Valid @NotBlank @PathVariable String id) {
         try {
             ColumnDto column = columnService.findById(id);
             return ResponseEntity.ok(column);
@@ -54,7 +58,7 @@ public class ColumnController {
     }
 
     @GetMapping("/tables/{tableId}/columns")
-    public ResponseEntity<?> findAll(@PathVariable String tableId) {
+    public ResponseEntity<?> findAll(@Valid @NotBlank @PathVariable String tableId) {
         try {
             List<ColumnDto> columns = columnService.findAll(tableId);
             return ResponseEntity.ok(columns);
@@ -64,7 +68,8 @@ public class ColumnController {
     }
 
     @DeleteMapping("/tables/{tableId}/columns/{id}")
-    public ResponseEntity<?> delete(@PathVariable String tableId, @PathVariable String id) {
+    public ResponseEntity<?> delete(@Valid @NotBlank @PathVariable String tableId,
+                                    @Valid @NotBlank @PathVariable String id) {
         try {
             columnService.delete(tableId, id);
             return ResponseEntity.ok().build();
@@ -74,9 +79,9 @@ public class ColumnController {
     }
 
     @PutMapping("/tables/{tableId}/columns/{id}")
-    public ResponseEntity<?> edit(@PathVariable String tableId,
-                                  @PathVariable String id,
-                                  @RequestBody ColumnMetadataDto dto) {
+    public ResponseEntity<?> edit(@Valid @NotBlank @PathVariable String tableId,
+                                  @Valid @NotBlank @PathVariable String id,
+                                  @Valid @RequestBody ColumnEditableMetadataDto dto) {
         try {
             ColumnDto column = columnService.edit(tableId, id, dto);
             return ResponseEntity.ok(column);
