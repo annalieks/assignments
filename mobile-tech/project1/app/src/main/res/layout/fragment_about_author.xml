@@ -10,34 +10,40 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_horizontal"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingLeft="15dp"
+        android:paddingTop="20dp"
+        android:paddingRight="15dp"
+        android:paddingBottom="20dp">
 
-        <EditText
-            android:id="@+id/aboutTheAuthorText"
-            android:layout_width="160dp"
-            android:layout_height="59dp"
-            android:clickable="false"
-            android:ems="10"
-            android:inputType="textPersonName"
-            android:text="About the Author"
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/comfortaa"
+            android:paddingBottom="10dp"
+            android:text="Про Автора"
+            android:textAlignment="center"
             android:textColor="#3F51B5"
-            android:textSize="20sp" />
+            android:textSize="18sp" />
 
         <ImageView
-            android:id="@+id/imageView3"
-            android:layout_width="307dp"
-            android:layout_height="259dp"
-            android:src="@drawable/photo" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="17dp" />
+            android:id="@+id/imageView"
+            android:layout_width="218dp"
+            android:layout_height="193dp"
+            android:src="@drawable/img_0107" />
 
         <TextView
             android:id="@+id/textView"
-            android:layout_width="307dp"
-            android:layout_height="304dp"
-            android:text="The program was created by Anna Alieksieienko for the Mobile Technologies course of Taras Shevchenko Kyiv National University." />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:fontFamily="@font/comfortaa"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:lineSpacingExtra="4sp"
+            android:text="@string/author_intro" />
+
     </LinearLayout>
 
 </FrameLayout>

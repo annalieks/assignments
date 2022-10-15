@@ -2,9 +2,9 @@
     <string name="app_name">Equation Calculator</string>
     <string name="action_about">About the Author</string>
     <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
+    <string name="calculator_label">Equations Calculator</string>
     <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
+    <string name="calculate">Calculate</string>
     <string name="previous">Previous</string>
 
     <string name="hello_first_fragment">Hello first fragment</string>
@@ -12,4 +12,5 @@
     <string name="title_activity_about_author">AboutAuthor</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="author_intro">Роботу виконала студентка 4 курсу Київського Національного Університету імені Тараса Шевченка факультету комп\'ютерних наук та кібернетики групи ТТП-42 Анна Алєксєєнко</string>
 </resources>

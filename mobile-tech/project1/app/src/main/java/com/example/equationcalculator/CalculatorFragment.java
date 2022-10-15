@@ -9,11 +9,11 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
-import com.example.equationcalculator.databinding.FragmentFirstBinding;
+import com.example.equationcalculator.databinding.FragmentCalculatorBinding;
 
-public class FirstFragment extends Fragment {
+public class CalculatorFragment extends Fragment {
 
-    private FragmentFirstBinding binding;
+    private FragmentCalculatorBinding binding;
     private static final String[] paths = {"item 1", "item 2", "item 3"};
 
     @Override
@@ -22,7 +22,7 @@ public class FirstFragment extends Fragment {
             Bundle savedInstanceState
     ) {
 
-        binding = FragmentFirstBinding.inflate(inflater, container, false);
+        binding = FragmentCalculatorBinding.inflate(inflater, container, false);
         return binding.getRoot();
 
     }
@@ -30,13 +30,7 @@ public class FirstFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        binding.buttonFirst.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                NavHostFragment.findNavController(FirstFragment.this)
-                        .navigate(R.id.action_FirstFragment_to_SecondFragment);
-            }
-        });
+
     }
 
     @Override

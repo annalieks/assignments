@@ -7,9 +7,9 @@
 
     <fragment
         android:id="@+id/FirstFragment"
-        android:name="com.example.equationcalculator.FirstFragment"
-        android:label="@string/first_fragment_label"
-        tools:layout="@layout/fragment_first">
+        android:name="com.example.equationcalculator.CalculatorFragment"
+        android:label="@string/calculator_label"
+        tools:layout="@layout/fragment_calculator">
 
         <action
             android:id="@+id/action_FirstFragment_to_SecondFragment"
