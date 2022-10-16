@@ -13,4 +13,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="author_intro">Роботу виконала студентка 4 курсу Київського Національного Університету імені Тараса Шевченка факультету комп\'ютерних наук та кібернетики групи ТТП-42 Анна Алєксєєнко</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="next">Next</string>
 </resources>
