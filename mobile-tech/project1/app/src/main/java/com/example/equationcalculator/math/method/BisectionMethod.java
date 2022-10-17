@@ -46,12 +46,12 @@ public class BisectionMethod {
 
     public static void checkApplicable(Function f, Interval i) throws MethodInapplicableException {
         if (i.getStart() > i.getEnd()) {
-            throw new MethodInapplicableException("Start of the interval is greater that its end");
+            throw new MethodInapplicableException("Початок інтервалу є більшим за його кінець");
         }
         if (f.calculate(i.getStart()) * f.calculate(i.getEnd()) > 0) {
-            throw new MethodInapplicableException("Cannot apply bisection method: either " +
-                    "f(a) < 0 and f(b) > 0 or f(a) > 0 and f(b) < 0 for the interval " +
-                    "[a, b] must be true");
+            throw new MethodInapplicableException("Неможливо застосувати метод бісекції: або " +
+                    "f(a) < 0 і f(b) > 0, aбо f(a) > 0 і f(b) < 0 повинно виконуватися " +
+                    "для інтервала [a, b]");
         }
 
     }

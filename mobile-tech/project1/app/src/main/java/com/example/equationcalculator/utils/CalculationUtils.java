@@ -12,9 +12,9 @@ public class CalculationUtils {
         double fx = f.calculate(x);
         if (Double.isNaN(fx)) {
             Argument arg = f.getArgument(0);
-            throw new MethodInapplicableException("Could not calculate the function value of " +
+            throw new MethodInapplicableException("Неможливо порахувати значення функції " +
                     "f(" + arg.getArgumentName() + ") = " + f.getFunctionExpressionString() +
-                    " in " + arg.getArgumentName() + "= " + x);
+                    " в " + arg.getArgumentName() + "= " + x);
         }
         return fx;
     }
@@ -23,8 +23,8 @@ public class CalculationUtils {
         double derX1 = ex.calculate();
         if (Double.isNaN(derX1)) {
             Argument arg = ex.getArgument(0);
-            throw new MethodInapplicableException("Could not calculate the derivative " +
-                    ex.getCanonicalExpressionString() + " in " +
+            throw new MethodInapplicableException("Неможливо порахувати похідну " +
+                    ex.getCanonicalExpressionString() + " в " +
                     arg.getArgumentName() + "= " + arg.getArgumentValue());
         }
         return derX1;

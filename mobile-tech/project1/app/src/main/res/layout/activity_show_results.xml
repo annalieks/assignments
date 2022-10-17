@@ -13,4 +13,7 @@
         android:layout_height="match_parent"
         tools:layout="@layout/fragment_show_results"
         tools:layout_editor_absoluteX="164dp" />
+
+    <include android:id="@+id/show_results_layout"
+        layout="@layout/fragment_show_results"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

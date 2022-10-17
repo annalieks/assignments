@@ -5,15 +5,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center_horizontal|center_vertical"
+    android:clickable="true"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     android:orientation="vertical"
     android:paddingLeft="15dp"
     android:paddingTop="20dp"
     android:paddingRight="15dp"
     android:paddingBottom="20dp"
-    android:clickable="true"
-    android:focusableInTouchMode="true"
-    tools:context=".CalculatorFragment"
-    android:focusable="true">
+    tools:context=".CalculatorFragment">
 
     <TextView
         android:id="@+id/textView4"
@@ -76,9 +76,130 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/prompt"
-            android:hint="f(x) = " />
+            android:hint="f(x) = "
+            android:inputType="text" />
 
     </com.google.android.material.textfield.TextInputLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="7dp">
+
+        <LinearLayout
+            android:id="@+id/root_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:visibility="invisible">
+
+            <TextView
+                android:id="@+id/textView8"
+                android:layout_width="245dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/comfortaa"
+                android:text="Приблизний корінь" />
+
+            <EditText
+                android:id="@+id/root_input"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:inputType="numberDecimal|numberSigned"
+                tools:ignore="SpeakableTextPresentCheck" />
+
+            <Space
+                android:layout_width="115dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/interval_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible">
+
+            <TextView
+                android:id="@+id/interval_text"
+                android:layout_width="97dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="@font/comfortaa"
+                android:text="Інтервал" />
+
+            <EditText
+                android:id="@+id/start_interval"
+                android:layout_width="75dp"
+                android:layout_height="47dp"
+                android:layout_weight="1"
+                android:ems="10"
+                android:fontFamily="@font/comfortaa"
+                android:hint="@string/start_interval"
+                android:inputType="numberDecimal|numberSigned"
+                android:nextFocusRight="@+id/end_interval"
+                android:nextFocusForward="@+id/end_interval"
+                android:nextFocusDown="@+id/end_interval"
+                />
+
+            <TextView
+                android:id="@+id/semicolon_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:width="1sp"
+                android:fontFamily="@font/comfortaa"
+                android:text=";"
+                android:textAlignment="center" />
+
+            <EditText
+                android:id="@+id/end_interval"
+                android:layout_width="75dp"
+                android:layout_height="47dp"
+                android:layout_weight="1"
+                android:ems="10"
+                android:fontFamily="@font/comfortaa"
+                android:hint="@string/end_interval"
+                android:inputType="numberDecimal|numberSigned" />
+
+            <Space
+                android:layout_width="40dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="53dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textView6"
+            android:layout_width="107dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/comfortaa"
+            android:text="Точність" />
+
+        <EditText
+            android:id="@+id/precision"
+            android:layout_width="102dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:fontFamily="@font/comfortaa"
+            android:inputType="numberDecimal"
+            tools:ignore="SpeakableTextPresentCheck" />
+
+        <Space
+            android:layout_width="143dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+    </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -95,7 +216,8 @@
             app:layout_constraintHorizontal_bias="0.502"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.799" />
+            app:layout_constraintVertical_bias="0.589" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>
