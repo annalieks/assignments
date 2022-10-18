@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.androidplot.xy.CatmullRomInterpolator;
 import com.androidplot.xy.LineAndPointFormatter;
 import com.androidplot.xy.SimpleXYSeries;
 import com.androidplot.xy.XYPlot;
@@ -37,6 +38,8 @@ import org.mariuszgromada.math.mxparser.Function;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class ShowResultsFragment extends Fragment {
@@ -81,8 +84,6 @@ public class ShowResultsFragment extends Fragment {
         // draw results
         double x = calculation.getResult().getX(), y = calculation.getResult().getY();
         int methodIdx = Integer.parseInt(getActivity().getIntent().getStringExtra(SELECTED_METHOD));
-        double start = Double.parseDouble(getActivity().getIntent().getStringExtra(INTERVAL_START));
-        double end = Double.parseDouble(getActivity().getIntent().getStringExtra(INTERVAL_END));
         Function f = extractFunction();
         if (f == null) return;
 
@@ -91,6 +92,8 @@ public class ShowResultsFragment extends Fragment {
             startPlot = x - RANGE;
             endPlot = x + RANGE;
         } else {
+            double start = Double.parseDouble(getActivity().getIntent().getStringExtra(INTERVAL_START));
+            double end = Double.parseDouble(getActivity().getIntent().getStringExtra(INTERVAL_END));
             startPlot = start - 1;
             endPlot = end + 1;
         }
@@ -106,18 +109,21 @@ public class ShowResultsFragment extends Fragment {
         }
 
         XYSeries series = new SimpleXYSeries(xSeries, ySeries, "Графік функції");
+        XYSeries point = new SimpleXYSeries(Collections.singletonList(x), Collections.singletonList(y), "Результат");
 
         LineAndPointFormatter series1Format = new LineAndPointFormatter(getContext(),
                 R.xml.line_point_formatter_with_labels);
-//        series1Format.setInterpolationParams(new CatmullRomInterpolator.Params(
-//                10, CatmullRomInterpolator.Type.Centripetal));
+        LineAndPointFormatter series2Format = new LineAndPointFormatter(getContext(),
+                R.xml.line_point_formatter_with_labels2);
         plot.addSeries(series, series1Format);
+        plot.addSeries(point, series2Format);
+        plot.getLayoutManager().remove(plot.getLegend());
         plot.setVisibility(View.VISIBLE);
         resultsLayout.setVisibility(View.VISIBLE);
         functionText.setText(f.getFunctionExpressionString());
         precisionText.setText(getActivity().getIntent().getStringExtra(PRECISION));
-        xText.setText(String.valueOf(x));
-        yText.setText(String.valueOf(y));
+        xText.setText(String.format("%6.3e", x));
+        yText.setText(String.format("%6.3e", y));
         progressBar.setVisibility(View.INVISIBLE);
     }
 
