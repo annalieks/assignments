@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import 'semantic-ui-css/semantic.min.css';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
+import IntersectView from './views/IntersectView/IntersectView';
 
 const App = () => {
   return (
@@ -18,6 +19,7 @@ const App = () => {
           <Route index element={<DatabasesView />} />
           <Route exact path="/database/:id" element={<DatabaseView />} />
           <Route exact path="/:dbId/table/:id" element={<TableView />} />
+          <Route exact path="/:id/intersect" element={<IntersectView />} />
           {/* <PrivateRoute exact path="/home" component={HomePage}/>
         <Route exact path="/login" component={() => <AuthForm register={false}/>}/>
         <Route exact path="/signup" component={() => <AuthForm register={true}/>}/>

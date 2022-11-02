@@ -155,7 +155,7 @@ public class TableService {
                 int idx = leftPos.get(j);
                 tmpFields[idx] = r.getFields().get(j);
             }
-            occurrences.add(List.of(tmpFields));
+            occurrences.add(Arrays.asList(tmpFields));
 
         }
         for (Row r : rightRows) {
@@ -164,7 +164,7 @@ public class TableService {
                 int idx = rightPos.get(j);
                 tmpFields[idx] = r.getFields().get(j);
             }
-            List<String> tmpFieldsList = List.of(tmpFields);
+            List<String> tmpFieldsList = Arrays.asList(tmpFields);
             if (occurrences.contains(tmpFieldsList)) {
                 result.getRows().add(composeRow(tmpFieldsList));
             }

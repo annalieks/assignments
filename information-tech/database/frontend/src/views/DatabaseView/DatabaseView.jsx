@@ -155,6 +155,12 @@ const DatabaseView = () => {
 					Edit Database
 				</button>
 				<button
+					className={styles.add_button}
+					onClick={() => navigate(`/${id}/intersect`)}
+				>
+					Tables Intersection
+				</button>
+				<button
 					className={styles.back_button}
 					onClick={() => navigate('/')}
 				>
