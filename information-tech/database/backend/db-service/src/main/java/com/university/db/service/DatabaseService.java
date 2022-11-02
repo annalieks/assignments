@@ -68,11 +68,12 @@ public class DatabaseService {
     public DatabaseDto edit(String id, DatabaseMetadataDto dto)
             throws NotFoundException, ConflictException {
         Optional<Database> existingDb = databaseRepository.findById(id);
+        Optional<Database> existingDbByName = databaseRepository.findByName(dto.getName());
         if (existingDb.isEmpty()) {
             handleNotFoundById(id);
         }
         Database db = existingDb.get();
-        if (db.getName().equals(dto.getName())) {
+        if (db.getName().equals(dto.getName()) || existingDbByName.isPresent()) {
             handleExistsByName(dto.getName());
         }
         db.setName(dto.getName());

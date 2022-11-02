@@ -80,8 +80,8 @@ public class DatabaseController {
     @PostMapping("/import")
     public ResponseEntity<?> importDb(@Valid @NotBlank @RequestParam("database") MultipartFile file) {
         try {
-            serializationService.importFile(file);
-            return ResponseEntity.ok().build();
+            DatabaseDto db = serializationService.importFile(file);
+            return ResponseEntity.ok(db);
         } catch (FileFormatException e) {
             return badRequest(e.getMessage());
         }

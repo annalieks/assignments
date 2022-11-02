@@ -13,6 +13,7 @@ import com.university.db.entity.Table;
 import com.university.db.exception.EntityException;
 import com.university.db.exception.FileFormatException;
 import com.university.db.exception.NotFoundException;
+import com.university.db.mapper.DatabaseMapper;
 import com.university.db.mapper.TableMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -40,17 +41,17 @@ public class SerializationService {
         return databaseDto;
     }
 
-    public void importFile(MultipartFile file) throws FileFormatException {
+    public DatabaseDto importFile(MultipartFile file) throws FileFormatException {
         try {
             ExportDatabaseDto dto = objectMapper.readValue(file.getBytes(), ExportDatabaseDto.class);
-            importDb(dto);
+            return importDb(dto);
         } catch (Exception e) {
             throw new FileFormatException("Provided file could not be processed. Reason: " + e.getMessage(), e);
         }
     }
 
     @Transactional
-    public void importDb(ExportDatabaseDto dto) throws EntityException {
+    public DatabaseDto importDb(ExportDatabaseDto dto) throws EntityException {
         DatabaseDto db = databaseService.create(dto.getName());
         for (ExportTableDto tableDto : dto.getTables()) {
             TableMetadataDto tableMetadataDto = TableMapper.exportedTableDtoToTableMetadataDto(tableDto);
@@ -63,6 +64,7 @@ public class SerializationService {
                 rowService.create(table.getId(), rowDto);
             }
         }
+        return db;
     }
 
 }
