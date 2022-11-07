@@ -55,7 +55,7 @@ public class Cells1 {
             System.err.println("Please check that N, K, p are specified correctly");
             System.exit(1);
         }
-        if (N <= 0 || K <= 0 || p > 0.5 || p <= 0) {
+        if (N <= 0 || K <= 0 || p <= 0) {
             System.err.println("Incorrect N, K, or p values");
             System.exit(1);
         }
@@ -65,7 +65,11 @@ public class Cells1 {
     public synchronized void moveParticle(int from, int to) {
         cells[from]--;
         cells[to]++;
-        System.out.println("Atom has moved from cell no." + from + " to cell no." + to);
+        StringBuilder sb = new StringBuilder();
+        for (int c : cells) {
+            sb.append(c).append(" ");
+        }
+        System.out.println(sb);
     }
 
     private class Particle implements Runnable {
@@ -81,7 +85,7 @@ public class Cells1 {
                 if (probability < p && cell != 0) { // go left
                     moveParticle(cell, cell - 1);
                     cell--;
-                } else if (probability < 2 * p && cell != N - 1) { // go right
+                } else if (probability > p && cell != N - 1) { // go right
                     moveParticle(cell, cell + 1);
                     cell++;
                 } // position remains the same otherwise

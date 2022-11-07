@@ -65,7 +65,11 @@ public class Cells0 {
     public void moveParticle(int from, int to) {
         cells[from]--;
         cells[to]++;
-        System.out.println("Atom has moved from cell no." + from + " to cell no." + to);
+        StringBuilder sb = new StringBuilder();
+        for (int c : cells) {
+            sb.append(c).append(" ");
+        }
+        System.out.println(sb);
     }
 
     private class Particle implements Runnable {
@@ -81,7 +85,7 @@ public class Cells0 {
                 if (probability < p && cell != 0) { // go left
                     moveParticle(cell, cell - 1);
                     cell--;
-                } else if (probability < 2 * p && cell != N - 1) { // go right
+                } else if (probability > p && cell != N - 1) { // go right
                     moveParticle(cell, cell + 1);
                     cell++;
                 } // position remains the same otherwise
