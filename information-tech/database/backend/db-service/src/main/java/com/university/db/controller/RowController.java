@@ -6,6 +6,8 @@ import com.university.db.exception.InvalidDataException;
 import com.university.db.exception.NotFoundException;
 import com.university.db.service.RowService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,9 +18,11 @@ import java.util.List;
 
 import static com.university.db.utils.RequestUtils.badRequest;
 import static com.university.db.utils.RequestUtils.notFound;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
-@RequestMapping("${api.context}")
+@RequestMapping("/db-service")
 public class RowController {
 
     private final String apiContext;
@@ -34,7 +38,7 @@ public class RowController {
     public ResponseEntity<?> find(@Valid @NotBlank @PathVariable String id) {
         try {
             RowDto row = rowService.find(id);
-            return ResponseEntity.ok(row);
+            return ResponseEntity.ok(CollectionModel.of(row, getLinks(id)));
         } catch (NotFoundException e) {
             return notFound(e.getMessage());
         }
@@ -44,7 +48,9 @@ public class RowController {
     public ResponseEntity<?> findAll(@Valid @NotBlank @PathVariable String tableId) {
         try {
             List<RowDto> rows = rowService.findAll(tableId);
-            return ResponseEntity.ok(rows);
+            rows.forEach(row -> row.add(getLinks(row.getId(), tableId)));
+            Link selfLink = linkTo(methodOn(RowController.class).findAll(tableId)).withSelfRel();
+            return ResponseEntity.ok(CollectionModel.of(rows, selfLink));
         } catch (NotFoundException e) {
             return notFound(e.getMessage());
         }
@@ -56,8 +62,8 @@ public class RowController {
         try {
             RowDto row = rowService.create(tableId, dto);
             return ResponseEntity.created(URI.create(
-                    String.format("%s/tables/%s/rows/%s", apiContext, tableId, row.getId())))
-                    .body(row);
+                            String.format("%s/tables/%s/rows/%s", apiContext, tableId, row.getId())))
+                    .body(CollectionModel.of(row, getLinks(row.getId(), tableId)));
         } catch (NotFoundException e) {
             return notFound(e.getMessage());
         } catch (InvalidDataException e) {
@@ -71,7 +77,7 @@ public class RowController {
                                   @Valid @RequestBody RowMetadataDto dto) {
         try {
             RowDto row = rowService.edit(tableId, id, dto);
-            return ResponseEntity.ok(row);
+            return ResponseEntity.ok(CollectionModel.of(row, getLinks(id, tableId)));
         } catch (NotFoundException e) {
             return notFound(e.getMessage());
         } catch (InvalidDataException e) {
@@ -88,6 +94,19 @@ public class RowController {
         } catch (NotFoundException e) {
             return notFound(e.getMessage());
         }
+    }
+
+    private List<Link> getLinks(String id, String tableId) {
+        Link findByIdLink = linkTo(methodOn(RowController.class)
+                .find(id)).withSelfRel();
+        Link allLink = linkTo(methodOn(RowController.class).findAll(tableId)).withRel("rows");
+        return List.of(findByIdLink, allLink);
+    }
+
+    private List<Link> getLinks(String id) {
+        Link findByIdLink = linkTo(methodOn(RowController.class)
+                .find(id)).withSelfRel();
+        return List.of(findByIdLink);
     }
 
 }

@@ -1,50 +1,222 @@
-openapi: "3.0.0"
+openapi: 3.0.3
+info:
+  title: Database Application - 0.1.0
+  description: |-
+    Simple Database Engine
+  version: 0.1.0
+servers:
+  - url: http://localhost:8080/
+tags:
+  - name: databases
+    description: Operations with Databases
+  - name: tables
+    description: Operations with Tables
+  - name: rows
+    description: Operations with Rows
+  - name: columns
+    description: Operations with Columns
 paths:
-  /databases:
+  /db-service/databases:
     get:
-      summary: Get all databases
-      operationId: getDatabases
       tags:
         - databases
-      parameters:
-        - name: limit
-          in: query
-          ...
+      summary: Find all databases
+      operationId: findAllDatabases
       responses:
-        ...
+        '200':
+          description: Successful found all databases
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DatabaseDto'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Database not found
+        '405':
+          description: Validation exception
     post:
-      summary: Create a database
+      tags:
+        - databases
+      summary: Create a new database
       operationId: createDatabase
-      ...
-  /pets/{petId}:
+      responses:
+        '201':
+          description: Successfully created a database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DatabaseDto'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Database not found
+        '405':
+          description: Validation exception
+
+  /db-service/databases/{id}:
     get:
-      summary: Info for a specific pet
-      operationId: showPetById
-      ...
-info:
+      tags:
+        - databases
+      summary: Find database by id
+      operationId: findDatabaseById
+      parameters:
+        - name: id
+          in: path
+          description: ID of the database to search for
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseDto'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Database not found
+        '405':
+          description: Validation exception
+    put:
+      tags:
+        - databases
+      summary: Edit an existing Database
+      operationId: editDatabase
+      parameters:
+        - name: id
+          in: path
+          description: ID of the database to edit
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: New database data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatabaseMetadataDto'
+        required: true
+      responses:
+        '200':
+          description: Database was edited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseDto'
+        '400':
+          description: Invalid body or id supplied
+        '405':
+          description: Validation exception
+    delete:
+      tags:
+        - databases
+      summary: Delete an existing database
+      operationId: deleteDatabase
+      parameters:
+        - name: id
+          in: path
+          description: ID of the database to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Database was deleted
+        '400':
+          description: Invalid id supplied
+        '405':
+          description: Validation exception
+
+  /db-service/databases/{id}/export:
+    get:
+      tags:
+        - databases
+      summary: Export an existing database
+      operationId: exportDatabase
+      parameters:
+        - name: id
+          in: path
+          description: ID of the database to export
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Database was exported successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportDatabaseDto'
+        '400':
+          description: Invalid id supplied
+        '405':
+          description: Validation exception
+
 components:
   schemas:
-    Pet:
+    DatabaseDto:
       type: object
-      required:
-        - id
-        - name
       properties:
         id:
-          type: integer
-          format: int64
+          type: string
         name:
           type: string
-        tag:
-          type: string
-    Error:
+    DatabaseMetadataDto:
       type: object
-      required:
-        - code
-        - message
       properties:
-        code:
-          type: integer
-          format: int32
-        message:
+        name:
           type: string
+    ExportDatabaseDto:
+      type: object
+      properties:
+        name:
+          type: string
+        tables:
+          $ref: '#/components/schemas/ExportTableDto'
+    ExportTableDto:
+      type: object
+      properties:
+        name:
+          type: string
+        columns:
+          $ref: '#/components/schemas/ColumnMetadataDto'
+        rows:
+          $ref: '#/components/schemas/RowMetadataDto'
+    ColumnMetadataDto:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - INTEGER
+            - REAL
+            - CHAR
+            - STRING
+            - TIME
+            - TIMEINVL
+    RowMetadataDto:
+      type: object
+      properties:
+        fields:
+          type: array
+          items:
+            type: string
+
+
+
+
+
+
+
+
+
+

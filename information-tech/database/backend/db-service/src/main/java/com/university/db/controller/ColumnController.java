@@ -7,6 +7,8 @@ import com.university.db.exception.ConflictException;
 import com.university.db.exception.NotFoundException;
 import com.university.db.service.ColumnService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,9 +19,11 @@ import java.util.List;
 
 import static com.university.db.utils.RequestUtils.conflict;
 import static com.university.db.utils.RequestUtils.notFound;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
-@RequestMapping("${api.context}")
+@RequestMapping("/db-service")
 public class ColumnController {
 
     private final ColumnService columnService;
@@ -39,7 +43,7 @@ public class ColumnController {
             return ResponseEntity
                     .created(URI.create(String.format("%s/tables/%s/columns/%s",
                             apiContext, tableId, column.getId())))
-                    .body(column);
+                    .body(CollectionModel.of(column, getLinks(column.getId(), tableId)));
         } catch (NotFoundException e) {
             return notFound(e.getMessage());
         } catch (ConflictException e) {
@@ -51,7 +55,7 @@ public class ColumnController {
     public ResponseEntity<?> find(@Valid @NotBlank @PathVariable String id) {
         try {
             ColumnDto column = columnService.findById(id);
-            return ResponseEntity.ok(column);
+            return ResponseEntity.ok(CollectionModel.of(column, getLinks(id)));
         } catch (NotFoundException e) {
             return notFound(e.getMessage());
         }
@@ -61,7 +65,9 @@ public class ColumnController {
     public ResponseEntity<?> findAll(@Valid @NotBlank @PathVariable String tableId) {
         try {
             List<ColumnDto> columns = columnService.findAll(tableId);
-            return ResponseEntity.ok(columns);
+            Link selfLink = linkTo(methodOn(ColumnController.class).findAll(tableId)).withSelfRel();
+            columns.forEach(c -> c.add(getLinks(c.getId(), tableId)));
+            return ResponseEntity.ok(CollectionModel.of(columns, selfLink));
         } catch (NotFoundException e) {
             return notFound(e.getMessage());
         }
@@ -84,12 +90,25 @@ public class ColumnController {
                                   @Valid @RequestBody ColumnEditableMetadataDto dto) {
         try {
             ColumnDto column = columnService.edit(tableId, id, dto);
-            return ResponseEntity.ok(column);
+            return ResponseEntity.ok(CollectionModel.of(column, getLinks(id, tableId)));
         } catch (NotFoundException e) {
             return notFound(e.getMessage());
         } catch (ConflictException e) {
             return conflict(e.getMessage());
         }
+    }
+
+    private List<Link> getLinks(String id, String tableId) {
+        Link findByIdLink = linkTo(methodOn(ColumnController.class)
+                .find(id)).withSelfRel();
+        Link allLink = linkTo(methodOn(ColumnController.class).findAll(tableId)).withRel("columns");
+        return List.of(findByIdLink, allLink);
+    }
+
+    private List<Link> getLinks(String id) {
+        Link findByIdLink = linkTo(methodOn(ColumnController.class)
+                .find(id)).withSelfRel();
+        return List.of(findByIdLink);
     }
 
 }

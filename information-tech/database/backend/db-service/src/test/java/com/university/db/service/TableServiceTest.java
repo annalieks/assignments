@@ -1,10 +1,10 @@
 package com.university.db.service;
 
+import com.university.db.dto.TableDto;
 import com.university.db.dto.intersect.IntersectionTableDto;
-import com.university.db.entity.Column;
-import com.university.db.entity.Row;
-import com.university.db.entity.Table;
-import com.university.db.entity.ValueType;
+import com.university.db.dto.metadata.TableMetadataDto;
+import com.university.db.entity.*;
+import com.university.db.exception.ConflictException;
 import com.university.db.exception.InvalidDataException;
 import com.university.db.exception.NotFoundException;
 import com.university.db.repository.TableRepository;
@@ -29,6 +29,40 @@ public class TableServiceTest {
         tableRepository = Mockito.mock(TableRepository.class);
         databaseService = Mockito.mock(DatabaseService.class);
         tableService = new TableService(databaseService, tableRepository);
+    }
+
+    @Test
+    public void testCreateTable_success() throws NotFoundException, ConflictException {
+        Database database = new Database();
+        database.setTables(new ArrayList<>());
+        TableMetadataDto tableMetadataDto = new TableMetadataDto();
+        tableMetadataDto.setName("Test Table");
+        Table table = new Table();
+        table.setId("tableId");
+        table.setName(tableMetadataDto.getName());
+
+        Mockito.when(databaseService.findDatabaseById("databaseId")).thenReturn(database);
+        Mockito.when(tableRepository.save(Mockito.any(Table.class))).thenReturn(table);
+        TableDto tableDto = tableService.create("databaseId", tableMetadataDto);
+        Mockito.verify(databaseService, Mockito.times(1)).save(Mockito.any(Database.class));
+        Mockito.verify(tableRepository, Mockito.times(1)).save(Mockito.any(Table.class));
+        Assertions.assertEquals(tableDto.getName(), table.getName());
+        Assertions.assertEquals(tableDto.getId(), table.getId());
+    }
+
+    @Test
+    public void testCreateTable_duplicateNotAllowed() throws NotFoundException, ConflictException {
+        TableMetadataDto tableMetadataDto = new TableMetadataDto();
+        tableMetadataDto.setName("Test Table");
+        Table table = new Table();
+        table.setId("tableId");
+        table.setName(tableMetadataDto.getName());
+        Database database = new Database();
+        database.setTables(List.of(table));
+
+        Mockito.when(databaseService.findDatabaseById("databaseId")).thenReturn(database);
+        Assertions.assertThrows(ConflictException.class,
+                () -> tableService.create("databaseId", tableMetadataDto));
     }
 
     @Test
