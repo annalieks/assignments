@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".DbGpsFragment">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:ignore="SpeakableTextPresentCheck">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="30dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textview_first"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="База Даних"
+                android:textAlignment="center"
+                android:textColor="@color/purple_700"
+                android:textSize="18sp" />
+
+            <EditText
+                android:id="@+id/studentName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="П.І.Б студента"
+                android:inputType="textShortMessage"
+                android:minHeight="48dp" />
+
+            <EditText
+                android:id="@+id/mark1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="Оцінка з 1 предмету"
+                android:inputType="number"
+                android:minHeight="48dp" />
+
+            <EditText
+                android:id="@+id/mark2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="Оцінка з 2 предмету"
+                android:inputType="number"
+                android:minHeight="48dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/addStudentButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="2dp"
+                    android:text="Додати студента"
+                    android:textSize="12sp" />
+
+                <Button
+                    android:id="@+id/button2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="2dp"
+                    android:layout_weight="1"
+                    android:text="Очистити базу"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+            <ListView
+                android:id="@+id/all_students"
+                android:layout_width="match_parent"
+                android:layout_height="164dp"
+                android:background="#ECF0FA"
+                android:drawSelectorOnTop="false">
+
+            </ListView>
+
+            <Button
+                android:id="@+id/queryStudentsByMarkBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Показати студентів з середнім балом > 60"
+                android:textSize="12sp" />
+
+            <ListView
+                android:id="@+id/query_students"
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                android:background="#ECF0FA" />
+
+            <TextView
+                android:id="@+id/contactsTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Адресна Книга"
+                android:textAlignment="center"
+                android:textColor="@color/purple_700"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/gpsTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="GPS"
+                android:textAlignment="center"
+                android:textColor="@color/purple_700"
+                android:textSize="18sp" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>
