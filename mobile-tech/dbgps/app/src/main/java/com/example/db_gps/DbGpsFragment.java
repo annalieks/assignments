@@ -49,7 +49,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DbGpsFragment extends Fragment implements
-        LoaderManager.LoaderCallbacks<Cursor> {
+        LoaderManager.LoaderCallbacks<Cursor>, AdapterView.OnItemClickListener {
 
     private FragmentDbGpsBinding binding;
     private StudentDbHelper helper;
@@ -74,7 +74,8 @@ public class DbGpsFragment extends Fragment implements
     private static final String[] CONTACT_PROJECTION = {
             ContactsContract.Contacts._ID,
             ContactsContract.Contacts.LOOKUP_KEY,
-            ContactsContract.Contacts.DISPLAY_NAME_PRIMARY};
+            ContactsContract.Contacts.DISPLAY_NAME_PRIMARY,
+    };
 
     private static final int CONTACT_ID_INDEX = 0;
     private static final int CONTACT_KEY_INDEX = 1;
@@ -91,6 +92,7 @@ public class DbGpsFragment extends Fragment implements
     private EditText mark1;
     private EditText mark2;
     private TextView studentsPercent;
+    private TextView contactAddress;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -117,9 +119,7 @@ public class DbGpsFragment extends Fragment implements
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        // Delete the reference to the existing Cursor
         cursorAdapter.swapCursor(null);
-
     }
 
     @Override
@@ -143,6 +143,7 @@ public class DbGpsFragment extends Fragment implements
         mark1 = view.findViewById(R.id.mark1);
         mark2 = view.findViewById(R.id.mark2);
         studentsPercent = view.findViewById(R.id.studentsPercent);
+        contactAddress = view.findViewById(R.id.contactAddress);
 
         Button addStudentButton = view.findViewById(R.id.addStudentButton);
         addStudentButton.setOnClickListener(new AddStudentListener());
@@ -195,6 +196,24 @@ public class DbGpsFragment extends Fragment implements
             studentName.setText("");
             mark1.setText("");
             mark2.setText("");
+        }
+    }
+
+    private class ContactsTouchListener implements View.OnTouchListener {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            int action = event.getAction();
+            switch (action) {
+                case MotionEvent.ACTION_DOWN:
+                    v.getParent().requestDisallowInterceptTouchEvent(true);
+                    break;
+
+                case MotionEvent.ACTION_UP:
+                    v.getParent().requestDisallowInterceptTouchEvent(false);
+                    break;
+            }
+            v.onTouchEvent(event);
+            return true;
         }
     }
 
@@ -283,12 +302,33 @@ public class DbGpsFragment extends Fragment implements
                 FROM_COLUMNS, TO_IDS,
                 0);
         contactsList.setAdapter(cursorAdapter);
+//        contactsList.setOnTouchListener(new ListViewTouchListener());
+        contactsList.setOnItemClickListener(this);
+//        allStudentsList.setOnItemClickListener(this);
 
         allStudentsList.setAdapter(allStudentsAdapter);
         allStudentsList.setOnTouchListener(new ListViewTouchListener());
         queryStudentsList.setAdapter(queryStudentsAdapter);
         queryStudentsList.setOnTouchListener(new ListViewTouchListener());
         contactsList.setOnTouchListener(new ListViewTouchListener());
+    }
+
+    @Override
+    public void onItemClick(
+            AdapterView<?> parent, View item, int position, long rowID) {
+        Cursor cursor = ((SimpleCursorAdapter) parent.getAdapter()).getCursor();
+        cursor.moveToPosition(position);
+        contactId = cursor.getLong(CONTACT_ID_INDEX);
+        contactKey = cursor.getString(CONTACT_KEY_INDEX);
+        Cursor addressCursor = getActivity().getContentResolver().query(
+                ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_URI,
+                null, ContactsContract.CommonDataKinds.StructuredPostal.CONTACT_ID + " = ?",
+                new String[]{String.valueOf(contactId)}, null);
+        while (addressCursor.moveToNext()) {
+            int columnIndex = addressCursor.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS);
+            String foundAddress = addressCursor.getString(columnIndex);
+            contactAddress.setText(foundAddress);
+        }
     }
 
     @Override

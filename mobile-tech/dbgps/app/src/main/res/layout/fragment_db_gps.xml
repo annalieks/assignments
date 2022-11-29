@@ -17,7 +17,7 @@
             android:paddingLeft="20dp"
             android:paddingRight="20dp"
             android:paddingTop="10dp"
-            android:paddingBottom="30dp"
+            android:paddingBottom="100dp"
             android:orientation="vertical">
 
             <TextView
@@ -136,6 +136,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="128dp"
                 android:background="#ECFFE3" />
+
+            <TextView
+                android:id="@+id/contactAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
             <TextView
                 android:id="@+id/gpsTextView"
