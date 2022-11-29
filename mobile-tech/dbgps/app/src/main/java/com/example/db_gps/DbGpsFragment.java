@@ -1,6 +1,7 @@
 package com.example.db_gps;
 
 import static android.provider.BaseColumns._ID;
+import static androidx.core.content.ContextCompat.checkSelfPermission;
 import static com.example.db_gps.db.DatabaseContract.SQL_CREATE_ENTRIES;
 import static com.example.db_gps.db.DatabaseContract.SQL_DELETE_ENTRIES;
 import static com.example.db_gps.db.DatabaseContract.StudentEntry.COLUMN_FULL_NAME;
@@ -8,26 +9,37 @@ import static com.example.db_gps.db.DatabaseContract.StudentEntry.COLUMN_MARK1;
 import static com.example.db_gps.db.DatabaseContract.StudentEntry.COLUMN_MARK2;
 import static com.example.db_gps.db.DatabaseContract.StudentEntry.TABLE_NAME;
 
+import android.Manifest;
 import android.content.ContentValues;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
-import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.BaseColumns;
+import android.provider.ContactsContract;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.CursorLoader;
+import androidx.loader.content.Loader;
 
 import com.example.db_gps.databinding.FragmentDbGpsBinding;
 import com.example.db_gps.db.DatabaseContract;
@@ -36,22 +48,79 @@ import com.example.db_gps.db.StudentDbHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DbGpsFragment extends Fragment {
+public class DbGpsFragment extends Fragment implements
+        LoaderManager.LoaderCallbacks<Cursor> {
 
     private FragmentDbGpsBinding binding;
     private StudentDbHelper helper;
 
     private final ArrayList<String> allStudents = new ArrayList<>();
     private final ArrayList<String> queryStudents = new ArrayList<>();
+    private final ArrayList<String> contacts = new ArrayList<>();
     private ArrayAdapter<String> allStudentsAdapter;
     private ArrayAdapter<String> queryStudentsAdapter;
+    private ArrayAdapter<String> contactsAdapter;
+    private final static String[] FROM_COLUMNS = {
+            ContactsContract.Contacts.DISPLAY_NAME_PRIMARY
+    };
+    private final static int[] TO_IDS = {
+            android.R.id.text1
+    };
+    long contactId;
+    String contactKey;
+    Uri contactUri;
+    private SimpleCursorAdapter cursorAdapter;
+
+    private static final String[] CONTACT_PROJECTION = {
+            ContactsContract.Contacts._ID,
+            ContactsContract.Contacts.LOOKUP_KEY,
+            ContactsContract.Contacts.DISPLAY_NAME_PRIMARY};
+
+    private static final int CONTACT_ID_INDEX = 0;
+    private static final int CONTACT_KEY_INDEX = 1;
+
+    private static final String CONTACT_SELECTION =
+            ContactsContract.Contacts.DISPLAY_NAME_PRIMARY + " LIKE ?";
+
+    private final String[] selectionArgs = {"Іван%"};
 
     private ListView allStudentsList;
     private ListView queryStudentsList;
+    private ListView contactsList;
     private EditText studentName;
     private EditText mark1;
     private EditText mark2;
     private TextView studentsPercent;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        LoaderManager.getInstance(this).initLoader(0, null, this);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int loaderId, Bundle args) {
+        return new CursorLoader(
+                getActivity(),
+                ContactsContract.Contacts.CONTENT_URI,
+                CONTACT_PROJECTION,
+                CONTACT_SELECTION,
+                selectionArgs,
+                null
+        );
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        cursorAdapter.swapCursor(cursor);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        // Delete the reference to the existing Cursor
+        cursorAdapter.swapCursor(null);
+
+    }
 
     @Override
     public View onCreateView(
@@ -64,6 +133,9 @@ public class DbGpsFragment extends Fragment {
     }
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(getContext(), Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_CONTACTS}, 100);
+        }
         super.onViewCreated(view, savedInstanceState);
         helper = new StudentDbHelper(getContext());
         initLists(view);
@@ -162,7 +234,7 @@ public class DbGpsFragment extends Fragment {
     private long readToAdapter(ArrayAdapter<String> adapter, Cursor cursor) {
         List<String> students = new ArrayList<>();
         long i = 0;
-        while(cursor.moveToNext()) {
+        while (cursor.moveToNext()) {
             i++;
             int id = cursor.getInt(cursor.getColumnIndexOrThrow(_ID));
             String fullName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FULL_NAME));
@@ -198,16 +270,25 @@ public class DbGpsFragment extends Fragment {
     private void initLists(View view) {
         allStudentsList = view.findViewById(R.id.all_students);
         queryStudentsList = view.findViewById(R.id.query_students);
+        contactsList = view.findViewById(R.id.contacts);
 
         allStudentsAdapter = new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_list_item_1, allStudents);
         queryStudentsAdapter = new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_list_item_1, queryStudents);
+        cursorAdapter = new SimpleCursorAdapter(
+                getActivity(),
+                R.layout.contacts_list_item,
+                null,
+                FROM_COLUMNS, TO_IDS,
+                0);
+        contactsList.setAdapter(cursorAdapter);
 
         allStudentsList.setAdapter(allStudentsAdapter);
         allStudentsList.setOnTouchListener(new ListViewTouchListener());
         queryStudentsList.setAdapter(queryStudentsAdapter);
         queryStudentsList.setOnTouchListener(new ListViewTouchListener());
+        contactsList.setOnTouchListener(new ListViewTouchListener());
     }
 
     @Override

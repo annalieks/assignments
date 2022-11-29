@@ -131,6 +131,12 @@
                 android:textColor="@color/purple_700"
                 android:textSize="18sp" />
 
+            <ListView
+                android:id="@+id/contacts"
+                android:layout_width="match_parent"
+                android:layout_height="128dp"
+                android:background="#ECFFE3" />
+
             <TextView
                 android:id="@+id/gpsTextView"
                 android:layout_width="match_parent"
