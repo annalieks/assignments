@@ -16,6 +16,7 @@ public class StudentDbHelper extends SQLiteOpenHelper {
     public StudentDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         db = getWritableDatabase();
+        onCreate(db);
     }
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_ENTRIES);
