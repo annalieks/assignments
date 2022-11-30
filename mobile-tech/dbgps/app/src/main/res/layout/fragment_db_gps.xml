@@ -152,6 +152,12 @@
                 android:textColor="@color/purple_700"
                 android:textSize="18sp" />
 
+            <com.google.android.gms.maps.MapView
+                android:id="@+id/map"
+                android:layout_width="match_parent"
+                android:layout_height="253dp"
+                tools:ignore="SpeakableTextPresentCheck" />
+
         </LinearLayout>
     </ScrollView>
 

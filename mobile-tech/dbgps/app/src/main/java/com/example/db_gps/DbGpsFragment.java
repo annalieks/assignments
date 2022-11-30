@@ -44,12 +44,18 @@ import androidx.loader.content.Loader;
 import com.example.db_gps.databinding.FragmentDbGpsBinding;
 import com.example.db_gps.db.DatabaseContract;
 import com.example.db_gps.db.StudentDbHelper;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class DbGpsFragment extends Fragment implements
-        LoaderManager.LoaderCallbacks<Cursor>, AdapterView.OnItemClickListener {
+        LoaderManager.LoaderCallbacks<Cursor>, OnMapReadyCallback {
 
     private FragmentDbGpsBinding binding;
     private StudentDbHelper helper;
@@ -71,6 +77,7 @@ public class DbGpsFragment extends Fragment implements
     Uri contactUri;
     private SimpleCursorAdapter cursorAdapter;
 
+    private static final String MAPVIEW_BUNDLE_KEY = "MapViewBundleKey";
     private static final String[] CONTACT_PROJECTION = {
             ContactsContract.Contacts._ID,
             ContactsContract.Contacts.LOOKUP_KEY,
@@ -93,6 +100,7 @@ public class DbGpsFragment extends Fragment implements
     private EditText mark2;
     private TextView studentsPercent;
     private TextView contactAddress;
+    private MapView mMapView;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -123,6 +131,42 @@ public class DbGpsFragment extends Fragment implements
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        Bundle mapViewBundle = outState.getBundle(MAPVIEW_BUNDLE_KEY);
+        if (mapViewBundle == null) {
+            mapViewBundle = new Bundle();
+            outState.putBundle(MAPVIEW_BUNDLE_KEY, mapViewBundle);
+        }
+
+        mMapView.onSaveInstanceState(mapViewBundle);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mMapView.onResume();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mMapView.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mMapView.onStop();
+    }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+        map.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+    }
+
+    @Override
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState
@@ -144,6 +188,15 @@ public class DbGpsFragment extends Fragment implements
         mark2 = view.findViewById(R.id.mark2);
         studentsPercent = view.findViewById(R.id.studentsPercent);
         contactAddress = view.findViewById(R.id.contactAddress);
+
+        Bundle mapViewBundle = null;
+        if (savedInstanceState != null) {
+            mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);
+        }
+        mMapView = (MapView) view.findViewById(R.id.map);
+        mMapView.onCreate(mapViewBundle);
+
+        mMapView.getMapAsync(this);
 
         Button addStudentButton = view.findViewById(R.id.addStudentButton);
         addStudentButton.setOnClickListener(new AddStudentListener());
@@ -199,7 +252,8 @@ public class DbGpsFragment extends Fragment implements
         }
     }
 
-    private class ContactsTouchListener implements View.OnTouchListener {
+    private class ListViewTouchListener implements ListView.OnTouchListener {
+
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             int action = event.getAction();
@@ -217,22 +271,23 @@ public class DbGpsFragment extends Fragment implements
         }
     }
 
-    private class ListViewTouchListener implements ListView.OnTouchListener {
-
+    private class ContactItemClickListener implements AdapterView.OnItemClickListener {
         @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            int action = event.getAction();
-            switch (action) {
-                case MotionEvent.ACTION_DOWN:
-                    v.getParent().requestDisallowInterceptTouchEvent(true);
-                    break;
-
-                case MotionEvent.ACTION_UP:
-                    v.getParent().requestDisallowInterceptTouchEvent(false);
-                    break;
+        public void onItemClick(
+                AdapterView<?> parent, View item, int position, long rowID) {
+            Cursor cursor = ((SimpleCursorAdapter) parent.getAdapter()).getCursor();
+            cursor.moveToPosition(position);
+            contactId = cursor.getLong(CONTACT_ID_INDEX);
+            contactKey = cursor.getString(CONTACT_KEY_INDEX);
+            Cursor addressCursor = getActivity().getContentResolver().query(
+                    ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_URI,
+                    null, ContactsContract.CommonDataKinds.StructuredPostal.CONTACT_ID + " = ?",
+                    new String[]{String.valueOf(contactId)}, null);
+            while (addressCursor.moveToNext()) {
+                int columnIndex = addressCursor.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS);
+                String foundAddress = addressCursor.getString(columnIndex);
+                contactAddress.setText(foundAddress);
             }
-            v.onTouchEvent(event);
-            return true;
         }
     }
 
@@ -302,9 +357,8 @@ public class DbGpsFragment extends Fragment implements
                 FROM_COLUMNS, TO_IDS,
                 0);
         contactsList.setAdapter(cursorAdapter);
-//        contactsList.setOnTouchListener(new ListViewTouchListener());
-        contactsList.setOnItemClickListener(this);
-//        allStudentsList.setOnItemClickListener(this);
+        contactsList.setOnTouchListener(new ListViewTouchListener());
+        contactsList.setOnItemClickListener(new ContactItemClickListener());
 
         allStudentsList.setAdapter(allStudentsAdapter);
         allStudentsList.setOnTouchListener(new ListViewTouchListener());
@@ -314,27 +368,27 @@ public class DbGpsFragment extends Fragment implements
     }
 
     @Override
-    public void onItemClick(
-            AdapterView<?> parent, View item, int position, long rowID) {
-        Cursor cursor = ((SimpleCursorAdapter) parent.getAdapter()).getCursor();
-        cursor.moveToPosition(position);
-        contactId = cursor.getLong(CONTACT_ID_INDEX);
-        contactKey = cursor.getString(CONTACT_KEY_INDEX);
-        Cursor addressCursor = getActivity().getContentResolver().query(
-                ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_URI,
-                null, ContactsContract.CommonDataKinds.StructuredPostal.CONTACT_ID + " = ?",
-                new String[]{String.valueOf(contactId)}, null);
-        while (addressCursor.moveToNext()) {
-            int columnIndex = addressCursor.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS);
-            String foundAddress = addressCursor.getString(columnIndex);
-            contactAddress.setText(foundAddress);
-        }
-    }
-
-    @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    @Override
+    public void onPause() {
+        mMapView.onPause();
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        mMapView.onDestroy();
+        super.onDestroy();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mMapView.onLowMemory();
     }
 
 }
