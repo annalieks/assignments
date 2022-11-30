@@ -1,7 +1,9 @@
 package com.example.db_gps;
 
+import static android.content.Context.LOCATION_SERVICE;
 import static android.provider.BaseColumns._ID;
 import static androidx.core.content.ContextCompat.checkSelfPermission;
+import static com.example.db_gps.BuildConfig.MAPS_API_KEY;
 import static com.example.db_gps.db.DatabaseContract.SQL_CREATE_ENTRIES;
 import static com.example.db_gps.db.DatabaseContract.SQL_DELETE_ENTRIES;
 import static com.example.db_gps.db.DatabaseContract.StudentEntry.COLUMN_FULL_NAME;
@@ -10,12 +12,17 @@ import static com.example.db_gps.db.DatabaseContract.StudentEntry.COLUMN_MARK2;
 import static com.example.db_gps.db.DatabaseContract.StudentEntry.TABLE_NAME;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
-import android.net.Uri;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.BaseColumns;
@@ -33,10 +40,8 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.contract.ActivityResultContract;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -49,21 +54,25 @@ import androidx.loader.content.Loader;
 import com.example.db_gps.databinding.FragmentDbGpsBinding;
 import com.example.db_gps.db.DatabaseContract;
 import com.example.db_gps.db.StudentDbHelper;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.libraries.places.api.Places;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.DirectionsApi;
+import com.google.maps.DirectionsApiRequest;
+import com.google.maps.GeoApiContext;
+import com.google.maps.model.DirectionsLeg;
+import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.DirectionsRoute;
+import com.google.maps.model.DirectionsStep;
+import com.google.maps.model.EncodedPolyline;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Executor;
 
 public class DbGpsFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<Cursor>, OnMapReadyCallback {
@@ -73,10 +82,11 @@ public class DbGpsFragment extends Fragment implements
 
     private final ArrayList<String> allStudents = new ArrayList<>();
     private final ArrayList<String> queryStudents = new ArrayList<>();
-    private final ArrayList<String> contacts = new ArrayList<>();
     private ArrayAdapter<String> allStudentsAdapter;
     private ArrayAdapter<String> queryStudentsAdapter;
-    private ArrayAdapter<String> contactsAdapter;
+    private Location userLocation;
+    private Address contactLocation;
+    private LocationManager locationManager;
     private final static String[] FROM_COLUMNS = {
             ContactsContract.Contacts.DISPLAY_NAME_PRIMARY
     };
@@ -85,9 +95,7 @@ public class DbGpsFragment extends Fragment implements
     };
     long contactId;
     String contactKey;
-    Uri contactUri;
     private SimpleCursorAdapter cursorAdapter;
-    private FusedLocationProviderClient fusedLocationClient;
 
     private static final String MAPVIEW_BUNDLE_KEY = "MapViewBundleKey";
     private static final String[] CONTACT_PROJECTION = {
@@ -113,7 +121,7 @@ public class DbGpsFragment extends Fragment implements
     private TextView studentsPercent;
     private TextView contactAddress;
     private MapView mMapView;
-    private boolean locationPermissionGranted;
+    private GoogleMap map;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -174,20 +182,51 @@ public class DbGpsFragment extends Fragment implements
         mMapView.onStop();
     }
 
+    private void getPermissions() {
+        if (ContextCompat.checkSelfPermission(getContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    101);
+        }
+        if (checkSelfPermission(getContext(), Manifest.permission.READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{Manifest.permission.READ_CONTACTS}, 100);
+        }
+    }
+
+    @SuppressLint("MissingPermission")
     @Override
     public void onMapReady(GoogleMap map) {
-        map.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
-//        fusedLocationClient.getLastLocation()
-//                .addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
-//                    @Override
-//                    public void onSuccess(Location location) {
-//                        if (location != null) {
-//                            map.setLoca
-//                        }
-//                    }
-//                });
         map.setMyLocationEnabled(true);
         map.getUiSettings().setMyLocationButtonEnabled(true);
+        map.getUiSettings().setZoomControlsEnabled(true);
+        userLocation = getLastKnownLocation();
+        LatLng latLng = new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
+        this.map = map;
+    }
+
+    @SuppressLint("MissingPermission")
+    private Location getLastKnownLocation() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            locationManager = (LocationManager) getActivity()
+                    .getSystemService(LOCATION_SERVICE);
+        }
+        List<String> providers = locationManager.getProviders(true);
+        Location bestLocation = null;
+        for (String provider : providers) {
+            Location l = locationManager.getLastKnownLocation(provider);
+            if (l == null) {
+                continue;
+            }
+            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+                bestLocation = l;
+            }
+        }
+        return bestLocation;
     }
 
     @Override
@@ -202,12 +241,7 @@ public class DbGpsFragment extends Fragment implements
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(getContext(), Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_CONTACTS}, 100);
-        }
-        if (checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 100);
-        }
+        getPermissions();
         helper = new StudentDbHelper(getContext());
         initLists(view);
         studentName = view.findViewById(R.id.studentName);
@@ -220,7 +254,6 @@ public class DbGpsFragment extends Fragment implements
         if (savedInstanceState != null) {
             mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);
         }
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
         mMapView = view.findViewById(R.id.map);
         mMapView.onCreate(mapViewBundle);
         mMapView.getMapAsync(this);
@@ -311,12 +344,94 @@ public class DbGpsFragment extends Fragment implements
                     ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_URI,
                     null, ContactsContract.CommonDataKinds.StructuredPostal.CONTACT_ID + " = ?",
                     new String[]{String.valueOf(contactId)}, null);
+
+            String foundAddress = "";
             while (addressCursor.moveToNext()) {
-                int columnIndex = addressCursor.getColumnIndex(ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS);
-                String foundAddress = addressCursor.getString(columnIndex);
+                int columnIndex = addressCursor.getColumnIndex(
+                        ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS);
+                foundAddress = addressCursor.getString(columnIndex);
                 contactAddress.setText(foundAddress);
             }
+            contactLocation = getContactAddress(foundAddress);
+            markPlace(contactLocation);
+            drawRoute();
         }
+    }
+
+    private void drawRoute() {
+        List<LatLng> path = new ArrayList<>();
+        GeoApiContext context = new GeoApiContext.Builder().apiKey(MAPS_API_KEY).build();
+        DirectionsApiRequest req = DirectionsApi.getDirections(context,
+                userLocation.getLongitude() + "," + userLocation.getLatitude(),
+                contactLocation.getLongitude() + "," + contactLocation.getLatitude());
+        try {
+            DirectionsResult res = req.await();
+
+            if (res.routes != null && res.routes.length > 0) {
+                DirectionsRoute route = res.routes[0];
+                if (route.legs != null) {
+                    for (int i = 0; i < route.legs.length; i++) {
+                        DirectionsLeg leg = route.legs[i];
+                        if (leg.steps != null) {
+                            for (int j = 0; j < leg.steps.length; j++) {
+                                DirectionsStep step = leg.steps[j];
+                                if (step.steps != null && step.steps.length > 0) {
+                                    for (int k = 0; k < step.steps.length; k++) {
+                                        DirectionsStep step1 = step.steps[k];
+                                        EncodedPolyline points1 = step1.polyline;
+                                        if (points1 != null) {
+                                            List<com.google.maps.model.LatLng> coords1 = points1.decodePath();
+                                            for (com.google.maps.model.LatLng coord1 : coords1) {
+                                                path.add(new LatLng(coord1.lat, coord1.lng));
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    EncodedPolyline points = step.polyline;
+                                    if (points != null) {
+                                        List<com.google.maps.model.LatLng> coords = points.decodePath();
+                                        for (com.google.maps.model.LatLng coord : coords) {
+                                            path.add(new LatLng(coord.lat, coord.lng));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            Toast.makeText(getContext(), "Could not build a route", Toast.LENGTH_SHORT).show();
+        }
+
+        if (path.size() > 0) {
+            PolylineOptions opts = new PolylineOptions().addAll(path).color(Color.BLUE).width(5);
+            map.addPolyline(opts);
+        }
+        LatLng latLng = new LatLng(contactLocation.getLatitude(), contactLocation.getLongitude());
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
+    }
+
+    private void markPlace(Address address) {
+        map.addMarker(new MarkerOptions().position(
+                        new LatLng(address.getLatitude(), address.getLongitude()))
+                .title("Contact Address"));
+    }
+
+    private Address getContactAddress(String foundAddress) {
+        Geocoder geocoder = new Geocoder(getContext());
+        List<Address> addresses;
+        try {
+            addresses = geocoder.getFromLocationName(foundAddress, 1);
+        } catch (IOException e) {
+            Toast.makeText(getContext(), "Could not find contact location",
+                    Toast.LENGTH_SHORT).show();
+            return null;
+        }
+        if (addresses.size() == 0) {
+            return null;
+        }
+        return addresses.get(0);
     }
 
     private void fetchStudents() {
