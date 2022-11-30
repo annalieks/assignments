@@ -14,6 +14,7 @@ import android.content.ContentValues;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -33,9 +34,13 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.CursorLoader;
@@ -44,15 +49,21 @@ import androidx.loader.content.Loader;
 import com.example.db_gps.databinding.FragmentDbGpsBinding;
 import com.example.db_gps.db.DatabaseContract;
 import com.example.db_gps.db.StudentDbHelper;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.libraries.places.api.Places;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executor;
 
 public class DbGpsFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<Cursor>, OnMapReadyCallback {
@@ -76,6 +87,7 @@ public class DbGpsFragment extends Fragment implements
     String contactKey;
     Uri contactUri;
     private SimpleCursorAdapter cursorAdapter;
+    private FusedLocationProviderClient fusedLocationClient;
 
     private static final String MAPVIEW_BUNDLE_KEY = "MapViewBundleKey";
     private static final String[] CONTACT_PROJECTION = {
@@ -101,6 +113,7 @@ public class DbGpsFragment extends Fragment implements
     private TextView studentsPercent;
     private TextView contactAddress;
     private MapView mMapView;
+    private boolean locationPermissionGranted;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -164,6 +177,17 @@ public class DbGpsFragment extends Fragment implements
     @Override
     public void onMapReady(GoogleMap map) {
         map.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+//        fusedLocationClient.getLastLocation()
+//                .addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
+//                    @Override
+//                    public void onSuccess(Location location) {
+//                        if (location != null) {
+//                            map.setLoca
+//                        }
+//                    }
+//                });
+        map.setMyLocationEnabled(true);
+        map.getUiSettings().setMyLocationButtonEnabled(true);
     }
 
     @Override
@@ -177,10 +201,13 @@ public class DbGpsFragment extends Fragment implements
     }
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(getContext(), Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_CONTACTS}, 100);
         }
-        super.onViewCreated(view, savedInstanceState);
+        if (checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 100);
+        }
         helper = new StudentDbHelper(getContext());
         initLists(view);
         studentName = view.findViewById(R.id.studentName);
@@ -193,10 +220,11 @@ public class DbGpsFragment extends Fragment implements
         if (savedInstanceState != null) {
             mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);
         }
-        mMapView = (MapView) view.findViewById(R.id.map);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
+        mMapView = view.findViewById(R.id.map);
         mMapView.onCreate(mapViewBundle);
-
         mMapView.getMapAsync(this);
+
 
         Button addStudentButton = view.findViewById(R.id.addStudentButton);
         addStudentButton.setOnClickListener(new AddStudentListener());
