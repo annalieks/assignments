@@ -130,6 +130,45 @@ public class DbGpsFragment extends Fragment implements
     }
 
     @Override
+    public View onCreateView(
+            LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState
+    ) {
+        binding = FragmentDbGpsBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        getPermissions();
+        helper = new StudentDbHelper(getContext());
+        initLists(view);
+        studentName = view.findViewById(R.id.studentName);
+        mark1 = view.findViewById(R.id.mark1);
+        mark2 = view.findViewById(R.id.mark2);
+        studentsPercent = view.findViewById(R.id.studentsPercent);
+        contactAddress = view.findViewById(R.id.contactAddress);
+
+        Bundle mapViewBundle = null;
+        if (savedInstanceState != null) {
+            mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);
+        }
+        mMapView = view.findViewById(R.id.map);
+        mMapView.onCreate(mapViewBundle);
+        mMapView.getMapAsync(this);
+
+
+        Button addStudentButton = view.findViewById(R.id.addStudentButton);
+        addStudentButton.setOnClickListener(new AddStudentListener());
+        Button cleanDbButton = view.findViewById(R.id.cleanDbButton);
+        cleanDbButton.setOnClickListener(new CleanDbListener());
+        Button queryStudentsByMarkBtn = view.findViewById(R.id.queryStudentsByMarkBtn);
+        queryStudentsByMarkBtn.setOnClickListener(new QueryStudentsListener());
+
+        fetchStudents();
+    }
+
+    @Override
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle args) {
         return new CursorLoader(
                 getActivity(),
@@ -182,6 +221,17 @@ public class DbGpsFragment extends Fragment implements
         mMapView.onStop();
     }
 
+    @Override
+    public void onMapReady(GoogleMap map) {
+        map.setMyLocationEnabled(true);
+        map.getUiSettings().setMyLocationButtonEnabled(true);
+        map.getUiSettings().setZoomControlsEnabled(true);
+        userLocation = getLastKnownLocation();
+        LatLng latLng = new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+        this.map = map;
+    }
+
     private void getPermissions() {
         if (ContextCompat.checkSelfPermission(getContext(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -197,19 +247,6 @@ public class DbGpsFragment extends Fragment implements
         }
     }
 
-    @SuppressLint("MissingPermission")
-    @Override
-    public void onMapReady(GoogleMap map) {
-        map.setMyLocationEnabled(true);
-        map.getUiSettings().setMyLocationButtonEnabled(true);
-        map.getUiSettings().setZoomControlsEnabled(true);
-        userLocation = getLastKnownLocation();
-        LatLng latLng = new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
-        this.map = map;
-    }
-
-    @SuppressLint("MissingPermission")
     private Location getLastKnownLocation() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             locationManager = (LocationManager) getActivity()
@@ -227,46 +264,6 @@ public class DbGpsFragment extends Fragment implements
             }
         }
         return bestLocation;
-    }
-
-    @Override
-    public View onCreateView(
-            LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState
-    ) {
-        binding = FragmentDbGpsBinding.inflate(inflater, container, false);
-        return binding.getRoot();
-
-    }
-
-    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        getPermissions();
-        helper = new StudentDbHelper(getContext());
-        initLists(view);
-        studentName = view.findViewById(R.id.studentName);
-        mark1 = view.findViewById(R.id.mark1);
-        mark2 = view.findViewById(R.id.mark2);
-        studentsPercent = view.findViewById(R.id.studentsPercent);
-        contactAddress = view.findViewById(R.id.contactAddress);
-
-        Bundle mapViewBundle = null;
-        if (savedInstanceState != null) {
-            mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);
-        }
-        mMapView = view.findViewById(R.id.map);
-        mMapView.onCreate(mapViewBundle);
-        mMapView.getMapAsync(this);
-
-
-        Button addStudentButton = view.findViewById(R.id.addStudentButton);
-        addStudentButton.setOnClickListener(new AddStudentListener());
-        Button cleanDbButton = view.findViewById(R.id.cleanDbButton);
-        cleanDbButton.setOnClickListener(new CleanDbListener());
-        Button queryStudentsByMarkBtn = view.findViewById(R.id.queryStudentsByMarkBtn);
-        queryStudentsByMarkBtn.setOnClickListener(new QueryStudentsListener());
-
-        fetchStudents();
     }
 
     private class QueryStudentsListener implements View.OnClickListener {
@@ -362,8 +359,8 @@ public class DbGpsFragment extends Fragment implements
         List<LatLng> path = new ArrayList<>();
         GeoApiContext context = new GeoApiContext.Builder().apiKey(MAPS_API_KEY).build();
         DirectionsApiRequest req = DirectionsApi.getDirections(context,
-                userLocation.getLongitude() + "," + userLocation.getLatitude(),
-                contactLocation.getLongitude() + "," + contactLocation.getLatitude());
+                userLocation.getLatitude() + "," + userLocation.getLongitude(),
+                contactLocation.getLatitude() + "," + contactLocation.getLongitude());
         try {
             DirectionsResult res = req.await();
 
@@ -409,7 +406,7 @@ public class DbGpsFragment extends Fragment implements
             map.addPolyline(opts);
         }
         LatLng latLng = new LatLng(contactLocation.getLatitude(), contactLocation.getLongitude());
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12));
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
     }
 
     private void markPlace(Address address) {
