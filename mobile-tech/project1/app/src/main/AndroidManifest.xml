@@ -4,11 +4,11 @@
 
     <application
         android:allowBackup="true"
-        android:largeHeap="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.EquationCalculator"
@@ -16,7 +16,8 @@
         <activity
             android:name=".ShowResultsActivity"
             android:exported="false"
-            android:parentActivityName=".CalculatorActivity">>
+            android:parentActivityName=".CalculatorActivity">
+            >
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
@@ -30,7 +31,7 @@
                 android:value="" />
         </activity>
         <activity
-            android:name=".CalculatorActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.EquationCalculator.NoActionBar">
@@ -39,7 +40,14 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name=".CalculatorActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
@@ -48,7 +56,6 @@
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
