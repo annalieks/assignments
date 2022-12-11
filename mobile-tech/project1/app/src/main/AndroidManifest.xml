@@ -28,7 +28,18 @@
         <activity
             android:name=".AboutAuthorActivity"
             android:exported="false"
+            android:label="About the Author"
             android:parentActivityName=".CalculatorActivity">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+
+        <activity
+            android:name=".HelpActivity"
+            android:exported="false"
+            android:label="Help"
+            android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />

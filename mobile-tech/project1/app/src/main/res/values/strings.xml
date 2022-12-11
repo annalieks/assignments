@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Project 3</string>
     <string name="action_about">About the Author</string>
+    <string name="action_help">Help</string>
     <!-- Strings used for fragments for navigation -->
     <string name="calculator_label">Equations Calculator</string>
     <string name="dbgps_label">DB and GPS Project</string>
