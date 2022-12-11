@@ -3,12 +3,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@+id/FirstFragment">
+    app:startDestination="@+id/CalculatorFragment">
 
     <fragment
-        android:id="@+id/FirstFragment"
+        android:id="@+id/CalculatorFragment"
         android:name="com.example.equationcalculator.CalculatorFragment"
         android:label="@string/calculator_label"
         tools:layout="@layout/fragment_calculator">
     </fragment>
+
+    <fragment
+        android:id="@+id/ResultsFragment"
+        android:name="com.example.equationcalculator.CalculatorFragment"
+        android:label="@string/calculator_label"
+        tools:layout="@layout/fragment_calculator">
+
+        <action
+            android:id="@+id/action_ResultsFragment_to_CalculatorFragment"
+            app:destination="@id/CalculatorFragment" />
+    </fragment>
+
 </navigation>

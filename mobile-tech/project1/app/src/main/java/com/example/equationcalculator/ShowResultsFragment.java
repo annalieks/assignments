@@ -19,6 +19,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.androidplot.xy.LineAndPointFormatter;
 import com.androidplot.xy.SimpleXYSeries;
@@ -67,7 +68,7 @@ public class ShowResultsFragment extends Fragment {
         Calculation calculation = readFile(fileName);
         if (calculation == null || calculation.getResult() == null) {
             progressBar.setVisibility(View.INVISIBLE);
-            handleError("Дані розрахунків недоступні");
+            handleError("Неможливо відобразити результати", "Рівняння не має розв'язків на заданому інтервалі");
             return;
         }
         if (calculation.getInapplableReason() != null) {
@@ -155,11 +156,16 @@ public class ShowResultsFragment extends Fragment {
     }
 
     public void handleError(String message) {
+        handleError("Виникла помилка", message);
+    }
+
+    public void handleError(String title, String message) {
         AlertDialog.Builder dlgAlert = new AlertDialog.Builder(getContext());
         dlgAlert.setMessage(message);
-        dlgAlert.setTitle("Виникла помилка");
+        dlgAlert.setTitle(title);
         dlgAlert.setPositiveButton("Назад",
-                (dialog, which) -> startActivity(new Intent(getActivity(), CalculatorActivity.class)));
+                (dialog, which) -> NavHostFragment.findNavController(ShowResultsFragment.this)
+                        .navigate(R.id.action_MainFragment_to_CalculatorFragment));
         dlgAlert.show();
     }
 
