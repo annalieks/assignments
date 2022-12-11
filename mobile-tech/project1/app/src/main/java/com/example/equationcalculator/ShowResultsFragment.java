@@ -7,7 +7,6 @@ import static com.example.equationcalculator.utils.Constants.PRECISION;
 import static com.example.equationcalculator.utils.Constants.SELECTED_METHOD;
 
 import android.app.AlertDialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -68,7 +67,11 @@ public class ShowResultsFragment extends Fragment {
         Calculation calculation = readFile(fileName);
         if (calculation == null || calculation.getResult() == null) {
             progressBar.setVisibility(View.INVISIBLE);
-            handleError("Неможливо відобразити результати", "Рівняння не має розв'язків на заданому інтервалі");
+            if (!calculation.getInapplableReason().isEmpty()) {
+                handleError(calculation.getInapplableReason());
+            } else {
+                handleError("Неможливо відобразити результати", "Рівняння не має розв'язків на заданому інтервалі");
+            }
             return;
         }
         if (calculation.getInapplableReason() != null) {
@@ -164,8 +167,10 @@ public class ShowResultsFragment extends Fragment {
         dlgAlert.setMessage(message);
         dlgAlert.setTitle(title);
         dlgAlert.setPositiveButton("Назад",
-                (dialog, which) -> NavHostFragment.findNavController(ShowResultsFragment.this)
-                        .navigate(R.id.action_MainFragment_to_CalculatorFragment));
+                (dialog, which) -> {
+                    NavHostFragment.findNavController(ShowResultsFragment.this)
+                            .navigate(R.id.action_ResultsFragment_to_CalculatorFragment);
+                });
         dlgAlert.show();
     }
 

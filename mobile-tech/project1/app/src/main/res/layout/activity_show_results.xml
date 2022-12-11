@@ -6,9 +6,10 @@
     android:layout_height="match_parent"
     tools:context=".ShowResultsActivity">
 
-    <androidx.fragment.app.FragmentContainerView
+    <fragment
         android:id="@+id/fragmentContainerView"
-        android:name="com.example.equationcalculator.ShowResultsFragment"
+        app:navGraph="@navigation/nav_graph3"
+        android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:layout="@layout/fragment_show_results"

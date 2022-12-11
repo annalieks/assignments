@@ -220,6 +220,12 @@
                 android:text="Якщо на даному інтервалі не існує кореня, буде виведено відповідне повідомлення:" />
 
 
+            <ImageView
+                android:id="@+id/imageView10"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:src="@drawable/no_roots_error" />
+
             <TextView
                 android:id="@+id/textView18"
                 android:layout_width="match_parent"
