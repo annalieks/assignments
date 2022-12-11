@@ -19,8 +19,8 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingLeft="10dp"
-            android:paddingBottom="100dp"
-            android:paddingRight="10dp">
+            android:paddingRight="10dp"
+            android:paddingBottom="100dp">
 
             <TextView
                 android:layout_width="match_parent"
@@ -47,18 +47,18 @@
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
                 android:fontFamily="@font/comfortaa"
-                android:textFontWeight="700"
+                android:text="Для виконання розрахунків:"
                 android:textColor="@color/quantum_bluegrey500"
-                android:text="Для виконання розрахунків:" />
+                android:textFontWeight="700" />
 
             <TextView
                 android:id="@+id/textView4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
-                android:textColor="#815656"
                 android:fontFamily="@font/comfortaa"
-                android:text="1. Оберіть один з трьох доступних методів знаходження кореня" />
+                android:text="1. Оберіть один з трьох доступних методів знаходження кореня"
+                android:textColor="#815656" />
 
 
             <ImageView
@@ -74,9 +74,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
-                android:textColor="#815656"
                 android:fontFamily="@font/comfortaa"
-                android:text="2. Введіть рівняння. У ролі змінної має виступати символ 'x'" />
+                android:text="2. Введіть рівняння. У ролі змінної має виступати символ 'x'"
+                android:textColor="#815656" />
 
             <ImageView
                 android:id="@+id/imageView2"
@@ -90,9 +90,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
-                android:textColor="#815656"
                 android:fontFamily="@font/comfortaa"
-                android:text="3. Введіть інтервал, посеред якого знаходиться корінь (для методів бісекції та Ньютона)" />
+                android:text="3. Введіть інтервал, посеред якого знаходиться корінь (для методів бісекції та Ньютона)"
+                android:textColor="#815656" />
 
             <ImageView
                 android:id="@+id/imageView4"
@@ -105,11 +105,11 @@
                 android:id="@+id/approxRootText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
                 android:layout_marginLeft="15dp"
-                android:textColor="#815656"
+                android:layout_marginBottom="5dp"
                 android:fontFamily="@font/comfortaa"
-                android:text="або приблизний корінь (для методу Ньютона-Рафсона)" />
+                android:text="або приблизний корінь (для методу Ньютона-Рафсона)"
+                android:textColor="#815656" />
 
             <ImageView
                 android:id="@+id/imageView5"
@@ -123,9 +123,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
-                android:textColor="#815656"
                 android:fontFamily="@font/comfortaa"
-                android:text="4. Введіть точність розрахунків" />
+                android:text="4. Введіть точність розрахунків"
+                android:textColor="#815656" />
 
             <ImageView
                 android:id="@+id/imageView6"
@@ -138,9 +138,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
-                android:textColor="#815656"
                 android:fontFamily="@font/comfortaa"
-                android:text="5. Натисніть на кнопку 'Знайти корінь'" />
+                android:text="5. Натисніть на кнопку 'Знайти корінь'"
+                android:textColor="#815656" />
 
             <ImageView
                 android:id="@+id/imageView7"
@@ -153,28 +153,28 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
-                android:textColor="#815656"
                 android:fontFamily="@font/comfortaa"
-                android:text="6. Зачекайте, доки корінь шукається. Кількість часу залежить від складності рівняння, точності та довжини інтервалу/точності приблизного кореня" />
+                android:text="6. Зачекайте, доки корінь шукається. Кількість часу залежить від складності рівняння, точності та довжини інтервалу/точності приблизного кореня"
+                android:textColor="#815656" />
 
             <TextView
                 android:id="@+id/textView13"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
-                android:textColor="#815656"
                 android:fontFamily="@font/comfortaa"
-                android:text="7. В результаті обчислень на екран буде виведено:" />
+                android:text="7. В результаті обчислень на екран буде виведено:"
+                android:textColor="#815656" />
 
             <TextView
                 android:id="@+id/textView14"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
                 android:layout_marginLeft="15dp"
-                android:textColor="#815656"
+                android:layout_marginBottom="5dp"
                 android:fontFamily="@font/comfortaa"
-                android:text="- Графік функції з позначеним на ньому знайденим коренем рівняння" />
+                android:text="- Графік функції з позначеним на ньому знайденим коренем рівняння"
+                android:textColor="#815656" />
 
             <ImageView
                 android:id="@+id/imageView8"
@@ -187,11 +187,11 @@
                 android:id="@+id/textView9"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
                 android:layout_marginLeft="15dp"
-                android:textColor="#815656"
+                android:layout_marginBottom="5dp"
                 android:fontFamily="@font/comfortaa"
-                android:text="- Задану функцію та точність, а також знайдені корені" />
+                android:text="- Задану функцію та точність, а також знайдені корені"
+                android:textColor="#815656" />
 
             <ImageView
                 android:id="@+id/imageView9"
@@ -206,9 +206,9 @@
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
                 android:fontFamily="@font/comfortaa"
-                android:textFontWeight="700"
+                android:text="Обробка помилок"
                 android:textColor="@color/quantum_bluegrey500"
-                android:text="Обробка помилок" />
+                android:textFontWeight="700" />
 
             <TextView
                 android:id="@+id/textView15"
@@ -235,6 +235,12 @@
                 android:fontFamily="@font/comfortaa"
                 android:text="Якщо метод не можна застосувати до введених даних, буде відображено повідомлення з причиною:" />
 
+            <ImageView
+                android:id="@+id/imageView3"
+                android:layout_width="match_parent"
+                android:layout_height="110dp"
+                android:src="@drawable/error_with_reason" />
+
             <TextView
                 android:id="@+id/textView11"
                 android:layout_width="match_parent"
@@ -243,6 +249,20 @@
                 android:layout_marginBottom="5dp"
                 android:fontFamily="@font/comfortaa"
                 android:text="Якщо інтервал або функцію було введено некоректно, обчислення не почнуться і буде відображено повідомлення:" />
+
+            <ImageView
+                android:id="@+id/imageView12"
+                android:layout_width="wrap_content"
+                android:layout_height="250dp"
+                android:layout_marginBottom="7dp"
+                android:src="@drawable/interval_msg" />
+
+            <ImageView
+                android:id="@+id/imageView11"
+                android:layout_width="wrap_content"
+                android:layout_height="250dp"
+                android:baselineAligned="false"
+                android:src="@drawable/invalid_func_msg" />
 
         </LinearLayout>
     </ScrollView>
