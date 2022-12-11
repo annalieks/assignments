@@ -1,5 +1,6 @@
 package com.example.equationcalculator;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,11 +10,11 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
-import com.example.equationcalculator.databinding.FragmentSecondBinding;
+import com.example.equationcalculator.databinding.FragmentMainBinding;
 
-public class SecondFragment extends Fragment {
+public class MainFragment extends Fragment {
 
-    private FragmentSecondBinding binding;
+    private FragmentMainBinding binding;
 
     @Override
     public View onCreateView(
@@ -21,7 +22,7 @@ public class SecondFragment extends Fragment {
             Bundle savedInstanceState
     ) {
 
-        binding = FragmentSecondBinding.inflate(inflater, container, false);
+        binding = FragmentMainBinding.inflate(inflater, container, false);
         return binding.getRoot();
 
     }
@@ -29,11 +30,20 @@ public class SecondFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        binding.buttonSecond.setOnClickListener(new View.OnClickListener() {
+        binding.buttonProject1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NavHostFragment.findNavController(SecondFragment.this)
-                        .navigate(R.id.action_SecondFragment_to_FirstFragment);
+//                startActivity(new Intent(getActivity(), CalculatorActivity.class));
+                NavHostFragment.findNavController(MainFragment.this)
+                        .navigate(R.id.action_MainFragment_to_CalculatorFragment);
+            }
+        });
+
+
+        binding.buttonProject2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
             }
         });
     }
