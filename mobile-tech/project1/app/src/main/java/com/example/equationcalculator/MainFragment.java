@@ -43,7 +43,8 @@ public class MainFragment extends Fragment {
         binding.buttonProject2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                NavHostFragment.findNavController(MainFragment.this)
+                        .navigate(R.id.action_MainFragment_to_DbGpsFragment);
             }
         });
     }

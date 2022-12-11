@@ -13,6 +13,10 @@
         <action
             android:id="@+id/action_MainFragment_to_CalculatorFragment"
             app:destination="@id/CalculatorFragment" />
+
+        <action
+            android:id="@+id/action_MainFragment_to_DbGpsFragment"
+            app:destination="@id/DbGpsFragment" />
     </fragment>
 
     <fragment
@@ -20,5 +24,12 @@
         android:name="com.example.equationcalculator.CalculatorFragment"
         android:label="@string/second_fragment_label"
         tools:layout="@layout/fragment_calculator">
+    </fragment>
+
+    <fragment
+        android:id="@+id/DbGpsFragment"
+        android:name="com.example.equationcalculator.DbGpsFragment"
+        android:label="@string/second_fragment_label"
+        tools:layout="@layout/fragment_db_gps">
     </fragment>
 </navigation>
