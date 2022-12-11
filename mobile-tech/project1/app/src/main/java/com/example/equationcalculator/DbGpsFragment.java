@@ -142,9 +142,9 @@ public class DbGpsFragment extends Fragment implements OnMapReadyCallback {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         state = savedInstanceState;
+        initLists(view);
         initWithPermissions();
         helper = new StudentDbHelper(getContext());
-        initLists(view);
         studentName = view.findViewById(R.id.studentName);
         mark1 = view.findViewById(R.id.mark1);
         mark2 = view.findViewById(R.id.mark2);
@@ -305,6 +305,7 @@ public class DbGpsFragment extends Fragment implements OnMapReadyCallback {
         @Override
         public void onItemClick(
                 AdapterView<?> parent, View item, int position, long rowID) {
+            map.clear();
             Cursor cursor = ((SimpleCursorAdapter) parent.getAdapter()).getCursor();
             cursor.moveToPosition(position);
             contactId = cursor.getLong(CONTACT_ID_INDEX);
@@ -461,8 +462,6 @@ public class DbGpsFragment extends Fragment implements OnMapReadyCallback {
                     && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 initWithPermissions();
             } else {
-//                Toast.makeText(getActivity(), "Cannot display contacts and show map without granted permissions",
-//                        Toast.LENGTH_SHORT).show();
                 new AlertDialog.Builder(getContext())
                         .setTitle("Insufficient permissions")
                         .setMessage("Permissions are needed to get access to user contacts " +
@@ -498,21 +497,6 @@ public class DbGpsFragment extends Fragment implements OnMapReadyCallback {
             mMapView.onStart();
         }
     }
-//
-//    private void showMap() {
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-//                checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_GET_LOCATION);
-//        } else {
-//            Bundle mapViewBundle = null;
-//            if (state != null) {
-//                mapViewBundle = state.getBundle(MAPVIEW_BUNDLE_KEY);
-//            }
-//            mMapView = getView().findViewById(R.id.map);
-//            mMapView.onCreate(mapViewBundle);
-//            mMapView.getMapAsync(this);
-//        }
-//    }
 
     private void initLists(View view) {
         allStudentsList = view.findViewById(R.id.all_students);
@@ -523,15 +507,6 @@ public class DbGpsFragment extends Fragment implements OnMapReadyCallback {
                 android.R.layout.simple_list_item_1, allStudents);
         queryStudentsAdapter = new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_list_item_1, queryStudents);
-//        cursorAdapter = new SimpleCursorAdapter(
-//                getActivity(),
-//                R.layout.contacts_list_item,
-//                null,
-//                FROM_COLUMNS, TO_IDS,
-//                0);
-//        contactsList.setAdapter(cursorAdapter);
-//        contactsList.setOnTouchListener(new ListViewTouchListener());
-//        contactsList.setOnItemClickListener(new ContactItemClickListener());
 
         allStudentsList.setAdapter(allStudentsAdapter);
         allStudentsList.setOnTouchListener(new ListViewTouchListener());

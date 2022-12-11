@@ -3,7 +3,7 @@
     <string name="action_about">About the Author</string>
     <!-- Strings used for fragments for navigation -->
     <string name="calculator_label">Equations Calculator</string>
-    <string name="dbgps_label">Equations Calculator</string>
+    <string name="dbgps_label">DB and GPS Project</string>
     <string name="calculate">Calculate</string>
     <string name="previous">Previous</string>
 
