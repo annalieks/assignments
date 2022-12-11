@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Equation Calculator</string>
+    <string name="app_name">Project 3</string>
     <string name="action_about">About the Author</string>
     <!-- Strings used for fragments for navigation -->
     <string name="calculator_label">Equations Calculator</string>

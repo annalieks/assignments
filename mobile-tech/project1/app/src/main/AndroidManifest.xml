@@ -16,7 +16,7 @@
         <activity
             android:name=".ShowResultsActivity"
             android:exported="false"
-            android:parentActivityName=".MainActivity">>
+            android:parentActivityName=".CalculatorActivity">>
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
@@ -24,13 +24,13 @@
         <activity
             android:name=".AboutAuthorActivity"
             android:exported="false"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName=".CalculatorActivity">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".CalculatorActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.EquationCalculator.NoActionBar">
@@ -48,6 +48,10 @@
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
     </application>
 
 </manifest>

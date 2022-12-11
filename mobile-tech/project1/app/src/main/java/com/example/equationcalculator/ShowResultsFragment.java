@@ -20,7 +20,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.androidplot.xy.CatmullRomInterpolator;
 import com.androidplot.xy.LineAndPointFormatter;
 import com.androidplot.xy.SimpleXYSeries;
 import com.androidplot.xy.XYPlot;
@@ -38,7 +37,6 @@ import org.mariuszgromada.math.mxparser.Function;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -161,7 +159,7 @@ public class ShowResultsFragment extends Fragment {
         dlgAlert.setMessage(message);
         dlgAlert.setTitle("Виникла помилка");
         dlgAlert.setPositiveButton("Назад",
-                (dialog, which) -> startActivity(new Intent(getActivity(), MainActivity.class)));
+                (dialog, which) -> startActivity(new Intent(getActivity(), CalculatorActivity.class)));
         dlgAlert.show();
     }
 
