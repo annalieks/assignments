@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/MainFragment"
         android:name="com.example.equationcalculator.MainFragment"
-        android:label="@string/first_fragment_label"
+        android:label="@string/project_label"
         tools:layout="@layout/fragment_main">
         <action
             android:id="@+id/action_MainFragment_to_CalculatorFragment"
@@ -22,14 +22,19 @@
     <fragment
         android:id="@+id/CalculatorFragment"
         android:name="com.example.equationcalculator.CalculatorFragment"
-        android:label="@string/second_fragment_label"
+        android:label="@string/calculator_label"
         tools:layout="@layout/fragment_calculator">
     </fragment>
 
     <fragment
         android:id="@+id/DbGpsFragment"
         android:name="com.example.equationcalculator.DbGpsFragment"
-        android:label="@string/second_fragment_label"
+        android:label="@string/dbgps_label"
         tools:layout="@layout/fragment_db_gps">
+
+        <action
+            android:id="@+id/action_DbGpsFragment_to_MainFragment"
+            app:destination="@id/MainFragment" />
+
     </fragment>
 </navigation>

@@ -12,7 +12,10 @@ import static com.example.equationcalculator.db.DatabaseContract.StudentEntry.CO
 import static com.example.equationcalculator.db.DatabaseContract.StudentEntry.TABLE_NAME;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -40,14 +43,15 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.CursorLoader;
 import androidx.loader.content.Loader;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.equationcalculator.databinding.FragmentDbGpsBinding;
 import com.example.equationcalculator.db.DatabaseContract;
@@ -72,8 +76,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DbGpsFragment extends Fragment implements
-        LoaderManager.LoaderCallbacks<Cursor>, OnMapReadyCallback {
+public class DbGpsFragment extends Fragment implements OnMapReadyCallback {
 
     private FragmentDbGpsBinding binding;
     private StudentDbHelper helper;
@@ -107,8 +110,8 @@ public class DbGpsFragment extends Fragment implements
 
     private static final String CONTACT_SELECTION =
             ContactsContract.Contacts.DISPLAY_NAME_PRIMARY + " LIKE ?";
-
-    private final String[] selectionArgs = {"Іван%"};
+    private static final int PERMISSIONS_REQUEST = 100;
+    private final String[] selectionArgs = {"Іван %"};
 
     private ListView allStudentsList;
     private ListView queryStudentsList;
@@ -120,11 +123,11 @@ public class DbGpsFragment extends Fragment implements
     private TextView contactAddress;
     private MapView mMapView;
     private GoogleMap map;
+    private Bundle state;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LoaderManager.getInstance(this).initLoader(0, null, this);
     }
 
     @Override
@@ -138,7 +141,8 @@ public class DbGpsFragment extends Fragment implements
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        getPermissions();
+        state = savedInstanceState;
+        initWithPermissions();
         helper = new StudentDbHelper(getContext());
         initLists(view);
         studentName = view.findViewById(R.id.studentName);
@@ -146,15 +150,6 @@ public class DbGpsFragment extends Fragment implements
         mark2 = view.findViewById(R.id.mark2);
         studentsPercent = view.findViewById(R.id.studentsPercent);
         contactAddress = view.findViewById(R.id.contactAddress);
-
-        Bundle mapViewBundle = null;
-        if (savedInstanceState != null) {
-            mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);
-        }
-        mMapView = view.findViewById(R.id.map);
-        mMapView.onCreate(mapViewBundle);
-        mMapView.getMapAsync(this);
-
 
         Button addStudentButton = view.findViewById(R.id.addStudentButton);
         addStudentButton.setOnClickListener(new AddStudentListener());
@@ -164,59 +159,6 @@ public class DbGpsFragment extends Fragment implements
         queryStudentsByMarkBtn.setOnClickListener(new QueryStudentsListener());
 
         fetchStudents();
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int loaderId, Bundle args) {
-        return new CursorLoader(
-                getActivity(),
-                ContactsContract.Contacts.CONTENT_URI,
-                CONTACT_PROJECTION,
-                CONTACT_SELECTION,
-                selectionArgs,
-                null
-        );
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        cursorAdapter.swapCursor(cursor);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        cursorAdapter.swapCursor(null);
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        Bundle mapViewBundle = outState.getBundle(MAPVIEW_BUNDLE_KEY);
-        if (mapViewBundle == null) {
-            mapViewBundle = new Bundle();
-            outState.putBundle(MAPVIEW_BUNDLE_KEY, mapViewBundle);
-        }
-
-        mMapView.onSaveInstanceState(mapViewBundle);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        mMapView.onResume();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        mMapView.onStart();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        mMapView.onStop();
     }
 
     @Override
@@ -230,20 +172,17 @@ public class DbGpsFragment extends Fragment implements
         this.map = map;
     }
 
-    private void getPermissions() {
-        if (ContextCompat.checkSelfPermission(getContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(),
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    101);
-        }
-        if (checkSelfPermission(getContext(), Manifest.permission.READ_CONTACTS)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(),
-                    new String[]{Manifest.permission.READ_CONTACTS}, 100);
-        }
-    }
+//    private void getPermissions() {
+//        if (ContextCompat.checkSelfPermission(getContext(),
+//                Manifest.permission.ACCESS_FINE_LOCATION)
+//                != PackageManager.PERMISSION_GRANTED) {
+//            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+//        }
+//        if (checkSelfPermission(getContext(), Manifest.permission.READ_CONTACTS)
+//                != PackageManager.PERMISSION_GRANTED) {
+//            requestPermissionLauncher.launch(Manifest.permission.READ_CONTACTS);
+//        }
+//    }
 
     private Location getLastKnownLocation() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -325,6 +264,41 @@ public class DbGpsFragment extends Fragment implements
             v.onTouchEvent(event);
             return true;
         }
+    }
+
+    private List<String> getContactNames() {
+//        CursorLoader loader = new CursorLoader(
+//                getActivity(),
+//                ContactsContract.Contacts.CONTENT_URI,
+//                CONTACT_PROJECTION,
+//                CONTACT_SELECTION,
+//                selectionArgs,
+//                null
+//        );
+        cursorAdapter = new SimpleCursorAdapter(
+                getActivity(),
+                R.layout.contacts_list_item,
+                null,
+                FROM_COLUMNS, TO_IDS,
+                0);
+        List<String> contacts = new ArrayList<>();
+        ContentResolver cr = getActivity().getContentResolver();
+        Cursor cursor = cr.query(ContactsContract.Contacts.CONTENT_URI,
+                CONTACT_PROJECTION,
+                CONTACT_SELECTION,
+                selectionArgs,
+                null);
+        cursorAdapter.swapCursor(cursor);
+//        if (cursor.moveToFirst()) {
+//            do {
+//                String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+//                if (name != null && name.startsWith("Іван ")) {
+//                    contacts.add(name);
+//                }
+//            } while (cursor.moveToNext());
+//        }
+//        cursor.close();
+        return contacts;
     }
 
     private class ContactItemClickListener implements AdapterView.OnItemClickListener {
@@ -479,6 +453,67 @@ public class DbGpsFragment extends Fragment implements
         studentsPercent.setText(String.valueOf(percent));
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+        if (requestCode == PERMISSIONS_REQUEST) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED
+                    && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                initWithPermissions();
+            } else {
+//                Toast.makeText(getActivity(), "Cannot display contacts and show map without granted permissions",
+//                        Toast.LENGTH_SHORT).show();
+                new AlertDialog.Builder(getContext())
+                        .setTitle("Insufficient permissions")
+                        .setMessage("Permissions are needed to get access to user contacts " +
+                                "and current location")
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                NavHostFragment.findNavController(DbGpsFragment.this)
+                                        .navigate(R.id.action_DbGpsFragment_to_MainFragment);
+                            }
+                        }).show();
+            }
+        }
+    }
+
+    private void initWithPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                (checkSelfPermission(getContext(), Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED
+                        || checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST);
+        } else {
+            List<String> contacts = getContactNames();
+            contactsList.setAdapter(cursorAdapter);
+            contactsList.setOnTouchListener(new ListViewTouchListener());
+            contactsList.setOnItemClickListener(new ContactItemClickListener());
+
+            Bundle mapViewBundle = null;
+            if (state != null) {
+                mapViewBundle = state.getBundle(MAPVIEW_BUNDLE_KEY);
+            }
+            mMapView = getView().findViewById(R.id.map);
+            mMapView.onCreate(mapViewBundle);
+            mMapView.getMapAsync(this);
+            mMapView.onStart();
+        }
+    }
+//
+//    private void showMap() {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+//                checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_GET_LOCATION);
+//        } else {
+//            Bundle mapViewBundle = null;
+//            if (state != null) {
+//                mapViewBundle = state.getBundle(MAPVIEW_BUNDLE_KEY);
+//            }
+//            mMapView = getView().findViewById(R.id.map);
+//            mMapView.onCreate(mapViewBundle);
+//            mMapView.getMapAsync(this);
+//        }
+//    }
+
     private void initLists(View view) {
         allStudentsList = view.findViewById(R.id.all_students);
         queryStudentsList = view.findViewById(R.id.query_students);
@@ -488,45 +523,26 @@ public class DbGpsFragment extends Fragment implements
                 android.R.layout.simple_list_item_1, allStudents);
         queryStudentsAdapter = new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_list_item_1, queryStudents);
-        cursorAdapter = new SimpleCursorAdapter(
-                getActivity(),
-                R.layout.contacts_list_item,
-                null,
-                FROM_COLUMNS, TO_IDS,
-                0);
-        contactsList.setAdapter(cursorAdapter);
-        contactsList.setOnTouchListener(new ListViewTouchListener());
-        contactsList.setOnItemClickListener(new ContactItemClickListener());
+//        cursorAdapter = new SimpleCursorAdapter(
+//                getActivity(),
+//                R.layout.contacts_list_item,
+//                null,
+//                FROM_COLUMNS, TO_IDS,
+//                0);
+//        contactsList.setAdapter(cursorAdapter);
+//        contactsList.setOnTouchListener(new ListViewTouchListener());
+//        contactsList.setOnItemClickListener(new ContactItemClickListener());
 
         allStudentsList.setAdapter(allStudentsAdapter);
         allStudentsList.setOnTouchListener(new ListViewTouchListener());
         queryStudentsList.setAdapter(queryStudentsAdapter);
         queryStudentsList.setOnTouchListener(new ListViewTouchListener());
-        contactsList.setOnTouchListener(new ListViewTouchListener());
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
-    }
-
-    @Override
-    public void onPause() {
-        mMapView.onPause();
-        super.onPause();
-    }
-
-    @Override
-    public void onDestroy() {
-        mMapView.onDestroy();
-        super.onDestroy();
-    }
-
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        mMapView.onLowMemory();
     }
 
 }
