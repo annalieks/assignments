@@ -1,10 +1,8 @@
 from definitions import *
-from util import *
-
-verbose = 0
+from utils import *
 
 
-class KnowledgeBase(object):
+class KnowledgeBase:
     def __init__(self):
         self.facts = []
         self.rules = []
@@ -19,12 +17,12 @@ class KnowledgeBase(object):
         if fact not in self.facts:
             self.facts.append(fact)
             for rule in self.rules:
-                self.infer(fact, rule, self)
+                self.derive(fact, rule)
         else:
-            if fact.supported_by:
+            if fact.backed_by:
                 ind = self.facts.index(fact)
-                for f in fact.supported_by:
-                    self.facts[ind].supported_by.append(f)
+                for f in fact.backed_by:
+                    self.facts[ind].backed_by.append(f)
             else:
                 ind = self.facts.index(fact)
                 self.facts[ind].asserted = True
@@ -33,41 +31,41 @@ class KnowledgeBase(object):
         if rule not in self.rules:
             self.rules.append(rule)
             for fact in self.facts:
-                self.infer(fact, rule, self)
+                self.derive(fact, rule)
         else:
-            if rule.supported_by:
+            if rule.backed_by:
                 ind = self.rules.index(rule)
-                for f in rule.supported_by:
-                    self.rules[ind].supported_by.append(f)
+                for f in rule.backed_by:
+                    self.rules[ind].backed_by.append(f)
             else:
                 ind = self.rules.index(rule)
                 self.rules[ind].asserted = True
 
-    def ask(self, fact):
+    def query(self, fact):
         if isinstance(fact, Fact):
-            f = Fact(fact.statement)
-            bindings_lst = ListOfBindings()
+            f = Fact(fact.predicate)
+            bindings_lst = []
             for fact in self.facts:
-                binding = match(f.statement, fact.statement)
+                binding = match(f.predicate, fact.predicate)
                 if binding:
-                    bindings_lst.add_bindings(binding, [fact])
+                    bindings_lst.append(binding)
 
-            return bindings_lst if bindings_lst.list_of_bindings else []
+            return bindings_lst
 
         else:
-            print("Invalid question:", fact.statement)
+            print("Invalid question:", fact.predicate)
             return []
 
-    def infer(self, fact, rule, kb):
-        bindings = match(rule.lhs[0], fact.statement)
+    def derive(self, fact, rule):
+        bindings = match(rule.lhs[0], fact.predicate)
         if not bindings:
             return None
 
         if len(rule.lhs) == 1:
             new_fact = Fact(instantiate(rule.rhs, bindings), [[rule, fact]])
-            rule.supports_facts.append(new_fact)
-            fact.supports_facts.append(new_fact)
-            kb.add(new_fact)
+            rule.backs_facts.append(new_fact)
+            fact.backs_facts.append(new_fact)
+            self.add(new_fact)
         else:
             local_lhs = []
             local_rule = []
@@ -75,7 +73,7 @@ class KnowledgeBase(object):
                 local_lhs.append(instantiate(rule.lhs[i], bindings))
             local_rule.append(local_lhs)
             local_rule.append(instantiate(rule.rhs, bindings))
-            newrule = Rule(local_rule, [[rule, fact]])
-            rule.supports_rules.append(newrule)
-            fact.supports_rules.append(newrule)
-            kb.add(newrule)
+            new_rule = Rule(local_rule, [[rule, fact]])
+            rule.backs_rules.append(new_rule)
+            fact.backs_rules.append(new_rule)
+            self.add(new_rule)
