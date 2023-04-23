@@ -53,19 +53,24 @@ class Schedule:
                 if (classes[i].get_meeting_time() == classes[j].get_meeting_time()
                         and classes[i].get_day() == classes[j].get_day()
                         and classes[i].get_id() != classes[j].get_id()
-
                         and classes[i].get_course().get_grade() == classes[j].get_course().get_grade()):
-                    if (np.any(np.in1d(classes[i].get_dept().get_name(), classes[j].get_dept().get_name()))
-                            and not (classes[i].get_course().get_is_lab() is True
-                                     and classes[j].get_course().get_is_lab() is True)):
+                    if (np.any(np.in1d(classes[i].get_dept().get_name(),
+                                       classes[j].get_dept().get_name()))
+                            ):
                         self._num_of_conflicts += 1
-
-                    if classes[i].get_room() == classes[j].get_room():
-                        self._num_of_conflicts += 1
+                    #
+                    # if classes[i].get_room() == classes[j].get_room():
+                    #     self._num_of_conflicts += 1
                 if classes[i].get_meeting_time() == classes[j].get_meeting_time() \
                         and classes[i].get_day() == classes[
                     j].get_day() and classes[i].get_id() != classes[j].get_id():
                     if classes[i].get_teacher() == classes[j].get_teacher():
+                        self._num_of_conflicts += 1
+
+                if (classes[i].get_meeting_time() == classes[j].get_meeting_time()
+                        and classes[i].get_day() == classes[j].get_day()
+                and classes[i].get_id() != classes[j].get_id()):
+                    if classes[i].get_room() == classes[j].get_room():
                         self._num_of_conflicts += 1
         return 1 / (1.0 * self._num_of_conflicts + 1)
 

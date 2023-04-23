@@ -32,8 +32,12 @@ class Display:
         classes_dict = collections.OrderedDict()
         for day in self.data.DAYS:
             classes_dict[day] = []
+
         for cl in classes:
             classes_dict[cl.get_day().get_day()].append(cl)
+
+        for k in classes_dict:
+            classes_dict[k].sort(key=lambda c: c.get_meeting_time().get_time())
 
         for day in classes_dict.keys():
             for cl in classes_dict[day]:

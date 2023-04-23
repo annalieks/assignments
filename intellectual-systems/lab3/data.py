@@ -7,9 +7,9 @@ from teacher import Teacher
 
 
 class Data:
-    ROOMS = [["306", 120], ["705", 30], ["1", 120], ["232", 45], ["212", 25], ["317", 45]]
+    ROOMS = [["306", 120], ["705", 30], ["1", 120], ["232", 45], ["212", 25], ["317", 45], ["235", 45], ["342", 45]]
     DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
-    MEETING_TIMES = ["8:40 - 10:15", "10:35 - 12:10", "12:20 - 13:55", "14:05 - 15:40"]
+    MEETING_TIMES = ["08:40 - 10:15", "10:35 - 12:10", "12:20 - 13:55"]
     TEACHERS = [["1", "Golubeva K.M."], ["2", "Golubeva K.M."], ["3", "Marynych O.V."],
                 ["4", "Chentsov O.I."], ["5", "Shishatska O.V."], ["6", "Cholyi V.Y."],
                 ["7", "Livinska G.V."], ["8", "Karnaukh T.O."], ["9", "Panchenko T.V."],
